@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Money360 — AI-Powered Financial Intelligence Platform</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/responsive.css">
+  <style>
+    /* carousel-only additions — kept here so style.css and the rest of the site stay untouched */
+    .hero-carousel-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      width: 100%;
+      height: 100%;
+      padding: 18px;
+      box-sizing: border-box;
+    }
+    @media (min-width: 640px) {
+      .hero-carousel-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 14px;
+        padding: 24px;
+      }
+    }
+    .bank-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 8px;
+      min-height: 56px;
+      transition: border-color .15s ease, transform .15s ease;
+    }
+    .bank-card:hover { border-color: #c7d7f5; transform: translateY(-1px); }
+    .bank-card .slot {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      background: #fff; border: 1px dashed #cbd5e1; border-radius: 8px;
+      font-size: 10px; color: #94a3b8; font-weight: 600;
+    }
+    /* When the slot holds a real <img>, hide the dashed placeholder chrome */
+    .bank-card img.slot {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      object-fit: contain;
+      padding: 2px;
+    }
+    /* Slide 3: flexible provider card (replaces per-bank triple-logo card) */
+    .provider-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 56px;
+      padding: 8px;
+      transition: border-color .15s ease, transform .15s ease;
+    }
+    .provider-card:hover { border-color: #c7d7f5; transform: translateY(-1px); }
+    .provider-card .logo {
+      max-width: 100%; max-height: 32px; object-fit: contain;
+    }
+    .provider-card .placeholder {
+      width: 100%; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      background: #fff; border: 1px dashed #cbd5e1; border-radius: 8px;
+      font-size: 10px; color: #94a3b8; font-weight: 600;
+    }
+    .viz-tab {
+      font-size: 12px; font-weight: 600; color: #64748b;
+      padding: 6px 12px; border-radius: 9999px;
+      background: transparent; border: 1px solid transparent;
+      cursor: pointer; transition: color .15s ease, background .15s ease, border-color .15s ease;
+    }
+    .viz-tab:hover { color: #0f172a; }
+    .viz-tab.active {
+      color: #0f172a;
+      background: #ffffff;
+      border-color: #c7d7f5;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+    }
+  </style>
+</head>
+
+<body class="text-slate-900 antialiased">
+  <div class="ambient" aria-hidden="true">
+    <div class="blue"></div>
+    <div class="green"></div>
+  </div>
+
+  <div id="site-header"></div>
+
+  <main>
+
+    <section id="demo" class="max-w-[760px] mx-auto px-5 sm:px-8 pt-5">
+      <div class="fade-up d2 glass-frame soft-shadow rounded-[20px] sm:rounded-[26px] p-[8px] sm:p-[12px] relative">
+
+        <!-- slide viewport: fixed height, not aspect-video, so box stays compact -->
+        <div id="slideViewport" class="relative rounded-[14px] sm:rounded-[18px] overflow-hidden bg-[#0b1426]"
+          style="height:320px;">
+
+          <!-- Slide 1: Introduction (left content / right hero image) -->
+          <div class="hero-slide absolute inset-0" data-slide="0" data-duration="5000"
+            style="background: linear-gradient(135deg,#0b1426,#101d33);">
+            <div class="absolute inset-0 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 px-6 sm:px-8">
+              <div class="flex flex-col text-center sm:text-left sm:flex-1 sm:max-w-[55%]">
+                <span class="text-[11px] tracking-[0.14em] uppercase text-emerald-400 font-[600]">Money360</span>
+                <h3 class="text-white text-[20px] sm:text-[24px] font-[600] tracking-[-0.01em] mt-2 leading-snug">
+                  One dashboard for every number that matters
+                </h3>
+                <p class="text-slate-300/80 text-[12.5px] mt-2 max-w-[380px] mx-auto sm:mx-0">
+                  Live cash flow, risk and forecasts in a single screen.
+                </p>
+              </div>
+              <!-- Hero image: drop hero.webp (or hero.png) into assets/ to replace this. -->
+              <picture class="shrink-0 sm:flex-1 sm:max-w-[45%] flex items-center justify-center">
+                <source srcset="assets/hero.webp" type="image/webp">
+                <img src="assets/hero.png" alt="Money360 dashboard preview"
+                     class="w-full max-h-[260px] sm:max-h-[280px] object-contain rounded-[14px]"
+                     loading="eager" decoding="async">
+              </picture>
+            </div>
+          </div>
+
+          <!-- Slide 2: Product Demo (video) -->
+          <div class="hero-slide absolute inset-0" data-slide="1" data-duration="video">
+            <video id="demoVideo" class="w-full h-full object-cover" muted playsinline preload="auto"
+              src="assets/Demo.mp4"></video>
+            <div class="absolute inset-0"
+              style="background: linear-gradient(to top, rgba(7,18,36,0.4) 0%, transparent 55%);"></div>
+            <button id="playToggle"
+              class="absolute bottom-3 left-3 w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-md"
+              aria-label="Pause demo">
+              <svg id="pauseIcon" width="13" height="13" viewBox="0 0 24 24" fill="none">
+                <rect x="8" y="6" width="3" height="12" rx="1" fill="#0f172a" />
+                <rect x="13" y="6" width="3" height="12" rx="1" fill="#0f172a" />
+              </svg>
+              <svg id="playIcon" class="hidden" width="13" height="13" viewBox="0 0 24 24" fill="none">
+                <path d="M9 7.5v9l8-4.5-8-4.5Z" fill="#0f172a" />
+              </svg>
+            </button>
+            <div class="absolute bottom-3 right-3 text-[11px] text-white font-[600]">Intelligence Engine — Live</div>
+          </div>
+
+          <!-- Slide 3: Supported Banks & Payment Networks (flexible provider grid).
+               Final bank list is not yet locked. The grid below is rendered from the
+               PROVIDERS config in the carousel script — add/remove entries there to
+               expand or shrink the list. Each card can hold a single SVG logo; until
+               real logos land, cards show a dashed placeholder slot. -->
+          <div class="hero-slide absolute inset-0" data-slide="2" data-duration="5000" style="background:#ffffff;">
+            <div id="providerGrid" class="hero-carousel-grid"></div>
+          </div>
+
+          <!-- Slide 4: Financial Visualizations (mini tabs + graph container) -->
+          <div class="hero-slide absolute inset-0" data-slide="3" data-duration="5000" style="background:#ffffff;">
+            <div class="absolute inset-0 flex flex-col p-4 sm:p-5">
+              <!-- mini tab navigation -->
+              <div id="vizTabs" class="flex items-center gap-1.5 self-center bg-slate-100 rounded-full p-1">
+                <button class="viz-tab active" data-viz="sankey">Sankey</button>
+                <button class="viz-tab" data-viz="flow">Flow</button>
+                <button class="viz-tab" data-viz="timeline">Timeline</button>
+                <button class="viz-tab" data-viz="heatmap">Heatmap</button>
+              </div>
+              <!-- graph preview container — swap the <img> src per tab.
+                   Placeholder shows by default; once sankey.webp / flow.webp /
+                   timeline.webp / heatmap.webp are dropped into assets/graphs/
+                   the tab switch will load them automatically. -->
+              <div id="vizGraph" class="flex-1 mt-3 sm:mt-4 rounded-[14px] border border-slate-200 bg-white overflow-hidden flex items-center justify-center">
+                <img id="vizGraphImg" src="assets/graphs/sankey.jpg" alt="Graph preview" class="w-full h-full object-contain">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- carousel dots -->
+      <div class="flex items-center justify-center gap-2 mt-5">
+        <button class="hero-dot w-[7px] h-[7px] rounded-full bg-slate-900" data-i="0" aria-label="Slide 1"></button>
+        <button class="hero-dot w-[7px] h-[7px] rounded-full bg-slate-300" data-i="1" aria-label="Slide 2"></button>
+        <button class="hero-dot w-[7px] h-[7px] rounded-full bg-slate-300" data-i="2" aria-label="Slide 3"></button>
+        <button class="hero-dot w-[7px] h-[7px] rounded-full bg-slate-300" data-i="3" aria-label="Slide 4"></button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // ---------------------------------------------------------------------------
+    // Hero carousel controller
+    // - Slides 1, 3, 4: fixed 5s dwell
+    // - Slide 2: dwell = duration of the video (pauses carousel until 'ended')
+    // - Slide 4: internal tab switching does NOT advance the carousel
+    // - Manual dot click resets the timer for the destination slide
+    // - Mouse hover pauses the auto-advance; leave resumes it
+    // ---------------------------------------------------------------------------
+    (function () {
+      const slides = document.querySelectorAll('.hero-slide');
+      const dots = document.querySelectorAll('.hero-dot');
+      const viewport = document.getElementById('slideViewport');
+      const video = document.getElementById('demoVideo');
+      const playToggle = document.getElementById('playToggle');
+      const pauseIcon = document.getElementById('pauseIcon');
+      const playIcon = document.getElementById('playIcon');
+      const vizTabs = document.getElementById('vizTabs');
+      const vizGraphTitle = document.getElementById('vizGraphTitle');
+      const vizGraphImg = document.getElementById('vizGraphImg');
+
+      // Tab key -> graph image path (assets/graphs/*.png).
+      const VIZ_SOURCES = {
+        sankey:   'assets/graphs/sankey.jpg',
+        flow:     'assets/graphs/multibar.jpg',
+        timeline: 'assets/graphs/timeline.png',
+        heatmap:  'assets/graphs/heatmap.png',
+      };
+
+      const DEFAULT_DWELL = 5000; // ms — Slides 1, 3, 4
+      const VIDEO_DWELL = 'video'; // sentinel for slide 2
+
+      // ---- Slide 3: flexible provider grid ----
+      // Add or remove entries here when the final bank/payment-provider list lands.
+      // `logo` is the PNG path (relative to the site root).
+      const PROVIDERS = [
+        { name: 'L1',  logo: 'assets/banks/logo1.png' },
+        { name: 'L2',  logo: 'assets/banks/logo2.png' },
+        { name: 'L3',  logo: 'assets/banks/logo3.png' },
+        { name: 'L4',  logo: 'assets/banks/logo4.png' },
+        { name: 'L5',  logo: 'assets/banks/logo5.png' },
+        { name: 'L6',  logo: 'assets/banks/logo6.png' },
+        { name: 'L7',  logo: 'assets/banks/logo7.png' },
+        { name: 'L8',  logo: 'assets/banks/logo8.png' },
+        { name: 'L9',  logo: 'assets/banks/logo9.png' },
+        { name: 'L10', logo: 'assets/banks/logo10.png' },
+      ];
+      const providerGrid = document.getElementById('providerGrid');
+      if (providerGrid) {
+        providerGrid.innerHTML = PROVIDERS.map(p => {
+          const inner = p.logo
+            ? `<img class="logo" src="${p.logo}" alt="${p.name}">`
+            : `<span class="placeholder">${p.name}</span>`;
+          return `<div class="provider-card">${inner}</div>`;
+        }).join('');
+      }
+
+      let active = 0;
+      let timer = null;
+      let hovered = false;
+
+      function setPlaying(p) {
+        pauseIcon.classList.toggle('hidden', !p);
+        playIcon.classList.toggle('hidden', p);
+      }
+
+      function dwellFor(slideEl) {
+        if (!slideEl) return DEFAULT_DWELL;
+        return slideEl.dataset.duration === VIDEO_DWELL ? VIDEO_DWELL : DEFAULT_DWELL;
+      }
+
+      function clearTimer() {
+        if (timer) { clearTimeout(timer); timer = null; }
+      }
+
+      function scheduleAdvance() {
+        clearTimer();
+        if (hovered) return;
+        const dwell = dwellFor(slides[active]);
+        if (dwell === VIDEO_DWELL) {
+          // Slide 2: do nothing — 'ended' event will move us forward
+          return;
+        }
+        timer = setTimeout(() => goTo(active + 1), dwell);
+      }
+
+      function goTo(i, opts) {
+        const manual = !!(opts && opts.manual);
+        active = ((i % slides.length) + slides.length) % slides.length;
+
+        slides.forEach((s, idx) => {
+          s.style.opacity = idx === active ? '1' : '0';
+          s.style.pointerEvents = idx === active ? 'auto' : 'none';
+        });
+        dots.forEach((d, idx) => {
+          d.classList.toggle('bg-slate-900', idx === active);
+          d.classList.toggle('bg-slate-300', idx !== active);
+        });
+
+        // Slide 2: video owns the timeline
+        if (active === 1) {
+          try { video.currentTime = 0; } catch (e) { /* metadata may not be ready yet */ }
+          const playPromise = video.play();
+          if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(() => { /* autoplay can be blocked until user interaction */ });
+          }
+        } else {
+          // Leaving slide 2: stop/reset the video
+          video.pause();
+          try { video.currentTime = 0; } catch (e) { /* ignore */ }
+        }
+
+        if (manual) clearTimer();          // user-initiated jump cancels any pending tick
+        scheduleAdvance();
+      }
+
+      // ---- dot (manual) navigation ----
+      dots.forEach(d => d.addEventListener('click', () => {
+        goTo(parseInt(d.dataset.i, 10), { manual: true });
+      }));
+
+      // ---- video controls (slide 2) ----
+      playToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (video.paused) video.play(); else video.pause();
+      });
+      video.addEventListener('play', () => setPlaying(true));
+      video.addEventListener('pause', () => setPlaying(false));
+      video.addEventListener('ended', () => {
+        // Video finished — advance to slide 3
+        if (active === 1) goTo(2);
+      });
+
+      // ---- hover pause/resume ----
+      viewport.addEventListener('mouseenter', () => { hovered = true; clearTimer(); });
+      viewport.addEventListener('mouseleave', () => { hovered = false; scheduleAdvance(); });
+
+      // ---- slide 4: internal tab switching (carousel must NOT move) ----
+      if (vizTabs) {
+        vizTabs.addEventListener('click', (e) => {
+          const btn = e.target.closest('.viz-tab');
+          if (!btn) return;
+          e.stopPropagation(); // safety: don't bubble to anything that might re-trigger
+          vizTabs.querySelectorAll('.viz-tab').forEach(t => t.classList.toggle('active', t === btn));
+          // Swap the graph preview image for this tab.
+          const key = btn.dataset.viz;
+          if (vizGraphImg && key && VIZ_SOURCES[key]) {
+            vizGraphImg.src = VIZ_SOURCES[key];
+          }
+          // Reset the 5s dwell so the user has time to look at the new graph
+          if (active === 3) scheduleAdvance();
+        });
+      }
+
+      // ---- init ----
+      slides.forEach(s => { s.style.transition = 'opacity .5s ease'; });
+      goTo(0);
+    })();
+  </script>
+
+  <div id="site-footer"></div>
+  <script src="assets/partials.js"></script>
+  <script src="assets/nav.js"></script>
+</body>
+
+</html>

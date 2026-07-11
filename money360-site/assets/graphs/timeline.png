@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240">
+  <rect width="400" height="240" fill="#f8fafc"/>
+  <text x="200" y="115" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#64748b">Timeline</text>
+  <text x="200" y="135" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Replace with assets/graphs/timeline.png</text>
+</svg>

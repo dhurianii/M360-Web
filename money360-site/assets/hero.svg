@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240">
+  <rect width="400" height="240" fill="url(#bg)"/>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1426"/>
+      <stop offset="100%" stop-color="#101d33"/>
+    </linearGradient>
+  </defs>
+  <text x="200" y="115" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#94a3b8">Hero Image</text>
+  <text x="200" y="135" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#64748b">Replace with assets/hero.png</text>
+</svg>

@@ -1,0 +1,10 @@
+/* mobile default */
+.hidden { display: none; }
+.mobile-nav-menu { display: none; }
+.mobile-nav-menu.show { display: block; }
+
+/* desktop (768px+) */
+@media (min-width: 768px) {
+  .md\:flex { display: flex; }
+  .md\:hidden { display: none; }
+}
