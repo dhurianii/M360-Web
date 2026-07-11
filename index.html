@@ -168,9 +168,9 @@
               <!-- mini tab navigation -->
               <div id="vizTabs" class="flex items-center gap-1.5 self-center bg-slate-100 rounded-full p-1">
                 <button class="viz-tab active" data-viz="sankey">Sankey</button>
-                <button class="viz-tab" data-viz="flow">Flow</button>
+                <button class="viz-tab" data-viz="multibar">Multi-Bar</button>
                 <button class="viz-tab" data-viz="timeline">Timeline</button>
-                <button class="viz-tab" data-viz="heatmap">Heatmap</button>
+                <button class="viz-tab" data-viz="donut">Donut-map</button>
               </div>
               <!-- graph preview container — swap the <img> src per tab.
                    Placeholder shows by default; once sankey.webp / flow.webp /
@@ -220,9 +220,9 @@
       // Tab key -> graph image path (assets/graphs/*.png).
       const VIZ_SOURCES = {
         sankey:   'assets/graphs/sankey.jpg',
-        flow:     'assets/graphs/multibar.jpg',
+        multibar:     'assets/graphs/multibar.jpg',
         timeline: 'assets/graphs/timeline.png',
-        heatmap:  'assets/graphs/heatmap.png',
+        donut:  'assets/graphs/donut.jpg',
       };
 
       const DEFAULT_DWELL = 5000; // ms — Slides 1, 3, 4
