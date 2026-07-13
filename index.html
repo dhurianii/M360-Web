@@ -20,25 +20,34 @@
       position: relative;
       width: 100%; height: 100%;
       display: flex; align-items: center;
-      padding: 16px 56px;          /* room for circular arrows on both sides */
+      padding: 12px 14px;           /* tighter padding on mobile */
       box-sizing: border-box;
       background: #ffffff;
+    }
+    @media (min-width: 640px) {
+      .logo-carousel { padding: 16px 56px; }   /* room for circular arrows on tablet+ */
     }
     .logo-viewport {
       position: relative;
       flex: 1; height: 100%;
       overflow: hidden;
       /* peek of the next card on the right edge — signals "more content" */
-      padding-right: 40px;
+      padding-right: 0;
+    }
+    @media (min-width: 640px) {
+      .logo-viewport { padding-right: 40px; }
     }
     .logo-viewport::after {
       /* soft fade so the peeked card blends into the background */
       content: "";
       position: absolute;
       top: 0; right: 0; bottom: 0;
-      width: 40px;
+      width: 30px;
       background: linear-gradient(to right, rgba(255,255,255,0), #ffffff 80%);
       pointer-events: none;
+    }
+    @media (min-width: 640px) {
+      .logo-viewport::after { width: 40px; }
     }
     .logo-track {
       display: grid;
@@ -52,20 +61,26 @@
       will-change: transform;
     }
     .logo-card {
-      padding: 8px;
+      padding: 6px;
       box-sizing: border-box;
       display: flex; align-items: center; justify-content: center;
       min-height: 0;
+    }
+    @media (min-width: 640px) {
+      .logo-card { padding: 8px; }
     }
     .logo-card-inner {
       width: 100%; height: 100%;
       background: #ffffff;
       border: 1px solid #e5e7eb;            /* subtle border */
-      border-radius: 12px;                  /* rounded corners */
+      border-radius: 10px;                  /* rounded corners */
       box-shadow: 0 2px 8px rgba(15,23,42,0.06);  /* soft shadow */
       display: flex; align-items: center; justify-content: center;
-      padding: 14px;
+      padding: 8px;
       transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+    }
+    @media (min-width: 640px) {
+      .logo-card-inner { border-radius: 12px; padding: 14px; }
     }
     .logo-card-inner:hover {
       border-color: #c7d7f5;
@@ -74,16 +89,17 @@
     }
     .logo-card-inner svg,
     .logo-card-inner .logo-img {
-      max-width: 80%; max-height: 100%;
+      max-width: 80%; max-height: 80%;
       width: auto; height: auto;
     }
     .logo-card-inner .logo-img {
       object-fit: contain;
     }
+    /* Arrows: inside the carousel on mobile (no side padding), outside on tablet+ */
     .logo-arrow {
       position: absolute;
       top: 50%; transform: translateY(-50%);
-      width: 38px; height: 38px;
+      width: 30px; height: 30px;
       border-radius: 9999px;        /* circle */
       background: #ffffff;
       border: 1px solid #e5e7eb;
@@ -94,12 +110,22 @@
       transition: background .15s ease, transform .15s ease, opacity .2s ease;
       z-index: 2;
     }
+    @media (min-width: 640px) {
+      .logo-arrow { width: 38px; height: 38px; }
+    }
     .logo-arrow:hover { background: #f8fafc; }
     .logo-arrow:active { transform: translateY(-50%) scale(0.96); }
     .logo-arrow:disabled { opacity: 0.35; cursor: default; }
-    .logo-arrow.prev { left: 8px; }
-    .logo-arrow.next { right: 8px; }
-    .logo-arrow svg { width: 16px; height: 16px; }
+    .logo-arrow.prev { left: 4px; }
+    .logo-arrow.next { right: 4px; }
+    @media (min-width: 640px) {
+      .logo-arrow.prev { left: 8px; }
+      .logo-arrow.next { right: 8px; }
+    }
+    .logo-arrow svg { width: 14px; height: 14px; }
+    @media (min-width: 640px) {
+      .logo-arrow svg { width: 16px; height: 16px; }
+    }
     .viz-tab {
       font-size: 12px; font-weight: 600; color: #64748b;
       padding: 6px 12px; border-radius: 9999px;
@@ -129,31 +155,15 @@
     <section id="demo" class="max-w-[760px] mx-auto px-5 sm:px-8 pt-5">
       <div class="fade-up d2 glass-frame soft-shadow rounded-[20px] sm:rounded-[26px] p-[8px] sm:p-[12px] relative">
 
-        <!-- slide viewport: fixed height, not aspect-video, so box stays compact -->
-        <div id="slideViewport" class="relative rounded-[14px] sm:rounded-[18px] overflow-hidden bg-[#0b1426]"
-          style="height:320px;">
+        <!-- slide viewport: shorter on mobile so the carousel cards stay square-ish -->
+        <div id="slideViewport" class="relative rounded-[14px] sm:rounded-[18px] overflow-hidden bg-[#0b1426] h-[260px] sm:h-[320px]">
 
-          <!-- Slide 1: Introduction (left content / right hero image) -->
+          <!-- Slide 1: Hero image only -->
           <div class="hero-slide absolute inset-0" data-slide="0" data-duration="5000"
             style="background: linear-gradient(135deg,#0b1426,#101d33);">
-            <div class="absolute inset-0 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 px-6 sm:px-8">
-              <div class="flex flex-col text-center sm:text-left sm:flex-1 sm:max-w-[55%]">
-                <span class="text-[11px] tracking-[0.14em] uppercase text-emerald-400 font-[600]">Money360</span>
-                <h3 class="text-white text-[20px] sm:text-[24px] font-[600] tracking-[-0.01em] mt-2 leading-snug">
-                  One dashboard for every number that matters
-                </h3>
-                <p class="text-slate-300/80 text-[12.5px] mt-2 max-w-[380px] mx-auto sm:mx-0">
-                  Live cash flow, risk and forecasts in a single screen.
-                </p>
-              </div>
-              <!-- Hero image: drop hero.webp (or hero.png) into assets/ to replace this. -->
-              <picture class="shrink-0 sm:flex-1 sm:max-w-[45%] flex items-center justify-center">
-                <source srcset="assets/hero.webp" type="image/webp">
-                <img src="assets/hero.png" alt="Money360 dashboard preview"
-                     class="w-full max-h-[260px] sm:max-h-[280px] object-contain rounded-[14px]"
-                     loading="eager" decoding="async">
-              </picture>
-            </div>
+            <img src="assets/Hero.jpeg" alt="Money360 — Money in 360° view"
+                 class="absolute inset-0 w-full h-full object-cover"
+                 loading="eager" decoding="async">
           </div>
 
           <!-- Slide 2: Product Demo (video) -->
@@ -268,14 +278,14 @@
       // Twelve entries give 2 pages on desktop (2x4), 2 pages on
       // tablet (2x3), and 3 pages on mobile (2x2).
       const LOGOS = [
-        { name: 'Logo 1',  logo: 'assets/banks/logo1.png' },
-        { name: 'Logo 2',  logo: 'assets/banks/logo2.png' },
-        { name: 'Logo 3',  logo: 'assets/banks/logo3.png' },
-        { name: 'Logo 4',  logo: 'assets/banks/logo4.png' },
-        { name: 'Logo 5',  logo: 'assets/banks/logo5.png' },
-        { name: 'Logo 6',  logo: 'assets/banks/logo6.png' },
-        { name: 'Logo 7',  logo: 'assets/banks/logo7.png' },
-        { name: 'Logo 8',  logo: 'assets/banks/logo8.png' },
+        { name: 'Logo 1',  logo: 'assets/banks/SBI.png' },
+        { name: 'Logo 2',  logo: 'assets/banks/HDFC.jpg' },
+        { name: 'Logo 3',  logo: 'assets/banks/AXIS.png' },
+        { name: 'Logo 4',  logo: 'assets/banks/ICICI.png' },
+        { name: 'Logo 5',  logo: 'assets/banks/GPAY.jpg' },
+        { name: 'Logo 6',  logo: 'assets/banks/phonepay.png' },
+        { name: 'Logo 7',  logo: 'assets/banks/Samati.png' },
+        { name: 'Logo 8',  logo: 'assets/banks/MF.jpg' },
         { name: 'Logo 9',  logo: 'assets/banks/logo9.png' },
         { name: 'Logo 10', logo: 'assets/banks/logo10.png' },
       ];
@@ -285,18 +295,14 @@
       const logoNextBtn = document.getElementById('logoNext');
       let logoPage      = 0;
 
-      // Fraction of a column that shows as a peek on the right edge
-      // when there is a next page. 0.25 = "about a quarter" of a
-      // card visible — enough to suggest more content without
-      // looking broken. Increase for a larger peek, decrease for
-      // a subtler one.
-      const PEEK_FRACTION = 0.25;
-
       function colsPerPage() {
-        const w = window.innerWidth;
-        if (w >= 1024) return 4; // 2x4 desktop
-        if (w >= 640)  return 3; // 2x3 tablet
-        return 2;                // 2x2 mobile
+        // Prefer the actual carousel width — falls back to window width
+        // if the carousel isn't measurable yet (e.g. before first paint).
+        const carousel = document.querySelector('.logo-carousel');
+        const w = (carousel && carousel.clientWidth) || window.innerWidth;
+        if (w >= 760) return 4; // 2x4 desktop
+        if (w >= 520) return 3; // 2x3 tablet
+        return 2;               // 2x2 mobile
       }
 
       function applyLogoLayout() {
@@ -308,19 +314,10 @@
         if (logoPage >= totalPages) logoPage = totalPages - 1;
         if (logoPage < 0)           logoPage = 0;
 
-        // Column width in "track %" terms. Because the viewport has a
-        // right-side peek padding, the visible window is narrower than
-        // `cols` columns, so we shrink the column width slightly to
-        // make exactly `cols` columns fit and leave a peek strip on
-        // the right. We only add the peek when there's a next page.
-        const hasNext = logoPage < totalPages - 1;
-        const peekFactor = hasNext ? (1 - PEEK_FRACTION) : 1;
-        const colPctOfTrack = (100 / totalCols) * peekFactor;
-
-        // Each grid column is colPctOfTrack of the track. Track spans
-        // (totalCols/cols) viewport-widths; we translate by
-        // (page * cols / totalCols) * track-width to advance one page.
-        logoTrack.style.gridAutoColumns = colPctOfTrack + '%';
+        // Each grid column is 1/totalCols of the track; the track is
+        // (totalCols / cols) viewports wide so a translate of one
+        // viewport-width advances exactly one page.
+        logoTrack.style.gridAutoColumns = (100 / totalCols) + '%';
         logoTrack.style.width           = ((totalCols / cols) * 100) + '%';
         logoTrack.style.transform       = 'translateX(-' + ((logoPage * cols / totalCols) * 100) + '%)';
 
