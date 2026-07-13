@@ -15,68 +15,91 @@
   <link rel="stylesheet" href="assets/responsive.css">
   <style>
     /* carousel-only additions — kept here so style.css and the rest of the site stay untouched */
-    .hero-carousel-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      width: 100%;
-      height: 100%;
-      padding: 18px;
+    /* Slide 3 — logo carousel */
+    .logo-carousel {
+      position: relative;
+      width: 100%; height: 100%;
+      display: flex; align-items: center;
+      padding: 16px 56px;          /* room for circular arrows on both sides */
       box-sizing: border-box;
+      background: #ffffff;
     }
-    @media (min-width: 640px) {
-      .hero-carousel-grid {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 14px;
-        padding: 24px;
-      }
+    .logo-viewport {
+      position: relative;
+      flex: 1; height: 100%;
+      overflow: hidden;
+      /* peek of the next card on the right edge — signals "more content" */
+      padding-right: 40px;
     }
-    .bank-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 8px;
-      min-height: 56px;
-      transition: border-color .15s ease, transform .15s ease;
+    .logo-viewport::after {
+      /* soft fade so the peeked card blends into the background */
+      content: "";
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 40px;
+      background: linear-gradient(to right, rgba(255,255,255,0), #ffffff 80%);
+      pointer-events: none;
     }
-    .bank-card:hover { border-color: #c7d7f5; transform: translateY(-1px); }
-    .bank-card .slot {
-      width: 36px; height: 36px;
-      display: flex; align-items: center; justify-content: center;
-      background: #fff; border: 1px dashed #cbd5e1; border-radius: 8px;
-      font-size: 10px; color: #94a3b8; font-weight: 600;
+    .logo-track {
+      display: grid;
+      grid-template-rows: repeat(2, 1fr);
+      grid-auto-flow: column;
+      grid-auto-columns: 25%;      /* overridden by JS to (100/totalCols)% */
+      gap: 0;                      /* visual spacing comes from card padding */
+      height: 100%;
+      width: 100%;                  /* overridden by JS */
+      transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
     }
-    /* When the slot holds a real <img>, hide the dashed placeholder chrome */
-    .bank-card img.slot {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      object-fit: contain;
-      padding: 2px;
-    }
-    /* Slide 3: flexible provider card (replaces per-bank triple-logo card) */
-    .provider-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      min-height: 56px;
+    .logo-card {
       padding: 8px;
-      transition: border-color .15s ease, transform .15s ease;
-    }
-    .provider-card:hover { border-color: #c7d7f5; transform: translateY(-1px); }
-    .provider-card .logo {
-      max-width: 100%; max-height: 32px; object-fit: contain;
-    }
-    .provider-card .placeholder {
-      width: 100%; height: 32px;
+      box-sizing: border-box;
       display: flex; align-items: center; justify-content: center;
-      background: #fff; border: 1px dashed #cbd5e1; border-radius: 8px;
-      font-size: 10px; color: #94a3b8; font-weight: 600;
+      min-height: 0;
     }
+    .logo-card-inner {
+      width: 100%; height: 100%;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;            /* subtle border */
+      border-radius: 12px;                  /* rounded corners */
+      box-shadow: 0 2px 8px rgba(15,23,42,0.06);  /* soft shadow */
+      display: flex; align-items: center; justify-content: center;
+      padding: 14px;
+      transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+    }
+    .logo-card-inner:hover {
+      border-color: #c7d7f5;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(15,23,42,0.08);
+    }
+    .logo-card-inner svg,
+    .logo-card-inner .logo-img {
+      max-width: 80%; max-height: 100%;
+      width: auto; height: auto;
+    }
+    .logo-card-inner .logo-img {
+      object-fit: contain;
+    }
+    .logo-arrow {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      width: 38px; height: 38px;
+      border-radius: 9999px;        /* circle */
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 2px 8px rgba(15,23,42,0.10);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: #0f172a;
+      transition: background .15s ease, transform .15s ease, opacity .2s ease;
+      z-index: 2;
+    }
+    .logo-arrow:hover { background: #f8fafc; }
+    .logo-arrow:active { transform: translateY(-50%) scale(0.96); }
+    .logo-arrow:disabled { opacity: 0.35; cursor: default; }
+    .logo-arrow.prev { left: 8px; }
+    .logo-arrow.next { right: 8px; }
+    .logo-arrow svg { width: 16px; height: 16px; }
     .viz-tab {
       font-size: 12px; font-weight: 600; color: #64748b;
       padding: 6px 12px; border-radius: 9999px;
@@ -153,13 +176,23 @@
             <div class="absolute bottom-3 right-3 text-[11px] text-white font-[600]">Intelligence Engine — Live</div>
           </div>
 
-          <!-- Slide 3: Supported Banks & Payment Networks (flexible provider grid).
-               Final bank list is not yet locked. The grid below is rendered from the
-               PROVIDERS config in the carousel script — add/remove entries there to
-               expand or shrink the list. Each card can hold a single SVG logo; until
-               real logos land, cards show a dashed placeholder slot. -->
+          <!-- Slide 3: Logo Carousel.
+               Logos are rendered from the LOGOS array in the script below —
+               add or remove entries to change the set. Inline SVGs are used as
+               placeholders; swap each entry's `svg` for an <img src=...> or a
+               real SVG string later. -->
           <div class="hero-slide absolute inset-0" data-slide="2" data-duration="5000" style="background:#ffffff;">
-            <div id="providerGrid" class="hero-carousel-grid"></div>
+            <div class="logo-carousel">
+              <button class="logo-arrow prev" id="logoPrev" aria-label="Previous logos" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <div class="logo-viewport">
+                <div class="logo-track" id="logoTrack"></div>
+              </div>
+              <button class="logo-arrow next" id="logoNext" aria-label="Next logos" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
           </div>
 
           <!-- Slide 4: Financial Visualizations (mini tabs + graph container) -->
@@ -228,29 +261,99 @@
       const DEFAULT_DWELL = 5000; // ms — Slides 1, 3, 4
       const VIDEO_DWELL = 'video'; // sentinel for slide 2
 
-      // ---- Slide 3: flexible provider grid ----
-      // Add or remove entries here when the final bank/payment-provider list lands.
-      // `logo` is the PNG path (relative to the site root).
-      const PROVIDERS = [
-        { name: 'L1',  logo: 'assets/banks/logo1.png' },
-        { name: 'L2',  logo: 'assets/banks/logo2.png' },
-        { name: 'L3',  logo: 'assets/banks/logo3.png' },
-        { name: 'L4',  logo: 'assets/banks/logo4.png' },
-        { name: 'L5',  logo: 'assets/banks/logo5.png' },
-        { name: 'L6',  logo: 'assets/banks/logo6.png' },
-        { name: 'L7',  logo: 'assets/banks/logo7.png' },
-        { name: 'L8',  logo: 'assets/banks/logo8.png' },
-        { name: 'L9',  logo: 'assets/banks/logo9.png' },
-        { name: 'L10', logo: 'assets/banks/logo10.png' },
+      // ---- Slide 3: logo carousel (data-driven) ----
+      // Edit this single array to add or remove logos. `logo` is the
+      // image path (relative to the site root). Drop your files into
+      // assets/banks/ (or anywhere else) and point to them here.
+      // Twelve entries give 2 pages on desktop (2x4), 2 pages on
+      // tablet (2x3), and 3 pages on mobile (2x2).
+      const LOGOS = [
+        { name: 'Logo 1',  logo: 'assets/banks/logo1.png' },
+        { name: 'Logo 2',  logo: 'assets/banks/logo2.png' },
+        { name: 'Logo 3',  logo: 'assets/banks/logo3.png' },
+        { name: 'Logo 4',  logo: 'assets/banks/logo4.png' },
+        { name: 'Logo 5',  logo: 'assets/banks/logo5.png' },
+        { name: 'Logo 6',  logo: 'assets/banks/logo6.png' },
+        { name: 'Logo 7',  logo: 'assets/banks/logo7.png' },
+        { name: 'Logo 8',  logo: 'assets/banks/logo8.png' },
+        { name: 'Logo 9',  logo: 'assets/banks/logo9.png' },
+        { name: 'Logo 10', logo: 'assets/banks/logo10.png' },
       ];
-      const providerGrid = document.getElementById('providerGrid');
-      if (providerGrid) {
-        providerGrid.innerHTML = PROVIDERS.map(p => {
-          const inner = p.logo
-            ? `<img class="logo" src="${p.logo}" alt="${p.name}">`
-            : `<span class="placeholder">${p.name}</span>`;
-          return `<div class="provider-card">${inner}</div>`;
-        }).join('');
+
+      const logoTrack   = document.getElementById('logoTrack');
+      const logoPrevBtn = document.getElementById('logoPrev');
+      const logoNextBtn = document.getElementById('logoNext');
+      let logoPage      = 0;
+
+      // Fraction of a column that shows as a peek on the right edge
+      // when there is a next page. 0.25 = "about a quarter" of a
+      // card visible — enough to suggest more content without
+      // looking broken. Increase for a larger peek, decrease for
+      // a subtler one.
+      const PEEK_FRACTION = 0.25;
+
+      function colsPerPage() {
+        const w = window.innerWidth;
+        if (w >= 1024) return 4; // 2x4 desktop
+        if (w >= 640)  return 3; // 2x3 tablet
+        return 2;                // 2x2 mobile
+      }
+
+      function applyLogoLayout() {
+        if (!logoTrack) return;
+        const cols       = colsPerPage();
+        const totalLogos = LOGOS.length;
+        const totalCols  = Math.max(1, Math.ceil(totalLogos / 2));
+        const totalPages = Math.max(1, Math.ceil(totalLogos / (cols * 2)));
+        if (logoPage >= totalPages) logoPage = totalPages - 1;
+        if (logoPage < 0)           logoPage = 0;
+
+        // Column width in "track %" terms. Because the viewport has a
+        // right-side peek padding, the visible window is narrower than
+        // `cols` columns, so we shrink the column width slightly to
+        // make exactly `cols` columns fit and leave a peek strip on
+        // the right. We only add the peek when there's a next page.
+        const hasNext = logoPage < totalPages - 1;
+        const peekFactor = hasNext ? (1 - PEEK_FRACTION) : 1;
+        const colPctOfTrack = (100 / totalCols) * peekFactor;
+
+        // Each grid column is colPctOfTrack of the track. Track spans
+        // (totalCols/cols) viewport-widths; we translate by
+        // (page * cols / totalCols) * track-width to advance one page.
+        logoTrack.style.gridAutoColumns = colPctOfTrack + '%';
+        logoTrack.style.width           = ((totalCols / cols) * 100) + '%';
+        logoTrack.style.transform       = 'translateX(-' + ((logoPage * cols / totalCols) * 100) + '%)';
+
+        if (logoPrevBtn) logoPrevBtn.disabled = (logoPage === 0);
+        if (logoNextBtn) logoNextBtn.disabled = (logoPage >= totalPages - 1);
+      }
+
+      function renderLogos() {
+        if (!logoTrack) return;
+        logoTrack.innerHTML = LOGOS.map(l =>
+          '<div class="logo-card"><div class="logo-card-inner">' +
+            '<img class="logo-img" src="' + l.logo + '" alt="' + l.name + '" loading="lazy" decoding="async">' +
+          '</div></div>'
+        ).join('');
+        applyLogoLayout();
+      }
+
+      if (logoTrack) {
+        renderLogos();
+        logoPrevBtn && logoPrevBtn.addEventListener('click', () => {
+          if (logoPage > 0) { logoPage--; applyLogoLayout(); }
+        });
+        logoNextBtn && logoNextBtn.addEventListener('click', () => {
+          const cols       = colsPerPage();
+          const totalPages = Math.max(1, Math.ceil(LOGOS.length / (cols * 2)));
+          if (logoPage < totalPages - 1) { logoPage++; applyLogoLayout(); }
+        });
+        // Recompute columns / widths on resize
+        let resizeRaf = 0;
+        window.addEventListener('resize', () => {
+          cancelAnimationFrame(resizeRaf);
+          resizeRaf = requestAnimationFrame(applyLogoLayout);
+        });
       }
 
       let active = 0;
