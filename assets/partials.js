@@ -48,7 +48,7 @@
         <a href="blogs.html" data-page="blogs" class="nav-link">Blogs</a>
         <a href="faqs.html" data-page="faqs" class="nav-link">FAQs</a>
       </nav>
-      <a href="https://megagraphs.com" class="try-demo-btn">TRY M360</a>
+      <a href="https://megagraphs.com/try-m360/" class="try-demo-btn">TRY M360</a>
     </div>
     <button id="mobileNavBtn" class="md:hidden w-9 h-9 flex items-center justify-center text-slate-700 shrink-0" aria-label="Menu">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
