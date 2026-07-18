@@ -61,7 +61,7 @@
     <a href="rnd.html" data-page="rnd" class="mobile-nav-link block py-2.5 text-[15px] font-medium text-slate-600">R&amp;D</a>
     <a href="blogs.html" data-page="blogs" class="mobile-nav-link block py-2.5 text-[15px] font-medium text-slate-600">Blogs</a>
     <a href="faqs.html" data-page="faqs" class="mobile-nav-link block py-2.5 text-[15px] font-medium text-slate-600">FAQs</a>
-    <a href="https://megagraphs.com/try-m360/" class="try-demo-btn inline-block mt-2">TRY DEMO</a>
+    <a href="https://megagraphs.com/try-m360/" class="try-demo-btn inline-block mt-2">TRY M360 </a>
   </div>
 </header>`;
 
