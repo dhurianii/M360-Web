@@ -84,6 +84,14 @@ body { background-color: #ffffff; }
   border-radius: 9px;
   background: #fff;
 }
+.site-logo {
+  height: 36px;
+  width: auto;
+  display: block;
+}
+@media (min-width: 768px) {
+  .site-logo { height: 40px; }
+}
 .try-demo-btn {
   font-size: 13px; font-weight: 600; letter-spacing: -0.01em;
   padding: 8px 16px; border-radius: 10px;

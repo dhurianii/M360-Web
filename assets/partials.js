@@ -23,23 +23,7 @@
 <header class="site-nav">
   <div class="max-w-[1200px] mx-auto px-5 sm:px-8 h-[68px] flex items-center justify-between gap-4">
     <a href="index.html" class="flex items-center gap-2.5 shrink-0 min-w-0">
-      <span class="logo-mark shrink-0">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" stroke-width="1.8">
-          <path d="M12 2 21 7v10l-9 5-9-5V7l9-5Z" />
-          <circle cx="12" cy="12" r="2.4" fill="#1e3a8a" />
-        </svg>
-      </span>
-      <span class="flex flex-col leading-tight min-w-0">
-        <span class="display-title text-[19px] font-[600] tracking-[-0.02em] money-grad">
-          M360
-        </span>
-        <span class="hidden md:block text-[11px] text-slate-900 whitespace-nowrap">
-          Money in 360°: Synthesis → Analyse → Visualize
-        </span>
-        <span class="block md:hidden text-[10px] text-slate-900">
-          Synthesis → Analyse → Visualize
-        </span>
-      </span>
+      <img src="assets/logo.png" alt="Money360" class="site-logo shrink-0">
     </a>
     <div class="hidden md:flex items-center gap-8 shrink-0">
       <nav class="flex items-center gap-8" id="primaryNav">
