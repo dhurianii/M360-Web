@@ -212,22 +212,16 @@
             </div>
           </div>
 
-          <!-- Slide 4: Financial Visualizations (mini tabs + graph container) -->
-          <div class="hero-slide absolute inset-0" data-slide="3" data-duration="5000" style="background:#ffffff;">
+          <!-- Slide 4: Financial Visualizations (automatic slideshow) -->
+          <div class="hero-slide absolute inset-0" data-slide="3" data-duration="20000" style="background:#ffffff;">
             <div class="absolute inset-0 flex flex-col p-4 sm:p-5">
-              <!-- mini tab navigation -->
-              <div id="vizTabs" class="flex items-center gap-1.5 self-center bg-slate-100 rounded-full p-1">
-                <button class="viz-tab active" data-viz="sankey">Sankey</button>
-                <button class="viz-tab" data-viz="multibar">Multi-Bar</button>
-                <button class="viz-tab" data-viz="timeline">Timeline</button>
-                <button class="viz-tab" data-viz="donut">Donut-map</button>
-              </div>
-              <!-- graph preview container — swap the <img> src per tab.
-                   Placeholder shows by default; once sankey.webp / flow.webp /
-                   timeline.webp / heatmap.webp are dropped into assets/graphs/
-                   the tab switch will load them automatically. -->
-              <div id="vizGraph" class="flex-1 mt-3 sm:mt-4 rounded-[14px] border border-slate-200 bg-white overflow-hidden flex items-center justify-center">
-                <img id="vizGraphImg" src="assets/graphs/sankey.jpg" alt="Graph preview" class="w-full h-full object-contain">
+              <!-- Graph preview container — fixed height, all 4 graphs stacked
+                   absolutely; the active one fades in. Prevents any layout jump. -->
+              <div id="vizGraph" class="flex-1 min-h-0 mt-3 sm:mt-4 rounded-[14px] border border-slate-200 bg-white overflow-hidden relative">
+                <img id="vizGraphImg" class="viz-img absolute inset-0 w-full h-full object-contain opacity-100 transition-opacity duration-500 ease-in-out" src="assets/graphs/sankey.jpg" alt="Sankey">
+                <img class="viz-img absolute inset-0 w-full h-full object-contain opacity-0 transition-opacity duration-500 ease-in-out" src="assets/graphs/multibar.jpg" alt="Multi-Bar">
+                <img class="viz-img absolute inset-0 w-full h-full object-contain opacity-0 transition-opacity duration-500 ease-in-out" src="assets/graphs/timeline.jpeg" alt="Timeline">
+                <img class="viz-img absolute inset-0 w-full h-full object-contain opacity-0 transition-opacity duration-500 ease-in-out" src="assets/graphs/donut.jpg" alt="Donut Map">
               </div>
             </div>
           </div>
@@ -415,6 +409,13 @@
           try { video.currentTime = 0; } catch (e) { /* ignore */ }
         }
 
+        // Slide 4: start/stop the automatic graph slideshow
+        if (active === 3) {
+          startVizCycle();
+        } else {
+          stopVizCycle();
+        }
+
         if (manual) clearTimer();          // user-initiated jump cancels any pending tick
         scheduleAdvance();
       }
@@ -440,21 +441,39 @@
       viewport.addEventListener('mouseenter', () => { hovered = true; clearTimer(); });
       viewport.addEventListener('mouseleave', () => { hovered = false; scheduleAdvance(); });
 
-      // ---- slide 4: internal tab switching (carousel must NOT move) ----
-      if (vizTabs) {
-        vizTabs.addEventListener('click', (e) => {
-          const btn = e.target.closest('.viz-tab');
-          if (!btn) return;
-          e.stopPropagation(); // safety: don't bubble to anything that might re-trigger
-          vizTabs.querySelectorAll('.viz-tab').forEach(t => t.classList.toggle('active', t === btn));
-          // Swap the graph preview image for this tab.
-          const key = btn.dataset.viz;
-          if (vizGraphImg && key && VIZ_SOURCES[key]) {
-            vizGraphImg.src = VIZ_SOURCES[key];
-          }
-          // Reset the 5s dwell so the user has time to look at the new graph
-          if (active === 3) scheduleAdvance();
+      // ---- slide 4: automatic graph slideshow (5s per graph, smooth fade) ----
+      // The .viz-img elements are stacked in the fixed-height #vizGraph
+      // container; we crossfade between them by toggling opacity.
+      // The cycle resets to index 0 every time the user lands on slide 4,
+      // so each visit always starts with the Sankey graph.
+      const vizImgs = document.querySelectorAll('.viz-img');
+      let vizIndex = 0;
+      let vizTimer = null;
+      const VIZ_DWELL_MS = 5000;
+      const FADE_MS = 500;
+
+      function showViz(i) {
+        if (!vizImgs.length) return;
+        vizImgs.forEach((img, idx) => {
+          img.style.opacity = idx === i ? '1' : '0';
         });
+      }
+
+      function vizStep() {
+        vizIndex = (vizIndex + 1) % vizImgs.length;
+        showViz(vizIndex);
+      }
+
+      function startVizCycle() {
+        stopVizCycle();
+        if (!vizImgs.length) return;
+        vizIndex = 0;
+        showViz(0);
+        vizTimer = setInterval(vizStep, VIZ_DWELL_MS);
+      }
+
+      function stopVizCycle() {
+        if (vizTimer) { clearInterval(vizTimer); vizTimer = null; }
       }
 
       // ---- init ----
