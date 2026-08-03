@@ -149,7 +149,7 @@
   </style>
 </head>
 
-<body class="text-slate-900 antialiased">
+<body class="text-slate-900 antialiased overflow-x-hidden">
   <div class="ambient" aria-hidden="true">
     <div class="blue"></div>
     <div class="green"></div>
@@ -159,11 +159,11 @@
 
   <main>
 
-    <section id="demo" class="max-w-[760px] mx-auto px-5 sm:px-8 pt-5">
-      <div class="fade-up d2 glass-frame soft-shadow rounded-[20px] sm:rounded-[26px] p-[8px] sm:p-[12px] relative">
+    <section id="demo" class="relative w-full h-[calc(100vh-68px)] overflow-hidden bg-[#0b1426]">
+      <div class="fade-up d2 absolute inset-0">
 
-        <!-- slide viewport: shorter on mobile so the carousel cards stay square-ish -->
-        <div id="slideViewport" class="relative rounded-[14px] sm:rounded-[18px] overflow-hidden bg-[#0b1426] h-[260px] sm:h-[320px]">
+        <!-- slide viewport: full-bleed, fills the entire hero area -->
+        <div id="slideViewport" class="relative w-full h-full overflow-hidden bg-[#0b1426]">
 
           <!-- Slide 1: Hero image only -->
           <div class="hero-slide absolute inset-0" data-slide="0" data-duration="5000"
@@ -236,7 +236,7 @@
       </div>
 
       <!-- carousel dots -->
-      <div class="flex items-center justify-center gap-2 mt-5">
+      <div class="absolute bottom-5 left-0 right-0 z-10 flex items-center justify-center gap-2">
         <button class="hero-dot w-[7px] h-[7px] rounded-full bg-slate-900" data-i="0" aria-label="Slide 1"></button>
         <button class="hero-dot w-[7px] h-[7px] rounded-full bg-slate-300" data-i="1" aria-label="Slide 2"></button>
         <button class="hero-dot w-[7px] h-[7px] rounded-full bg-slate-300" data-i="2" aria-label="Slide 3"></button>
