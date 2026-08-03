@@ -151,11 +151,12 @@
        Entrance: soft scale-in + fade. Idle: very gentle breathing pulse
        and a halo glow that breathes with it. */
     .m360-logo-wrap {
-      position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
     }
     .m360-logo-halo {
       position: absolute;
+      inset: 0;
+      margin: auto;
       width: min(560px, 70vw);
       height: min(560px, 70vw);
       border-radius: 9999px;
@@ -170,8 +171,6 @@
     }
     .m360-logo {
       position: relative;
-      width: clamp(180px, 28vw, 360px);
-      height: auto;
       opacity: 0;
       transform: scale(0.92);
       animation:
@@ -212,20 +211,18 @@
         <div id="slideViewport" class="relative w-full h-full overflow-hidden bg-[#0b1426]">
 
           <!-- Slide 1: Moneylizer PNG logo animation -->
-          <div class="hero-slide absolute inset-0" data-slide="0" data-duration="5000"
+          <div class="hero-slide absolute inset-0 overflow-hidden" data-slide="0" data-duration="5000"
             style="background: linear-gradient(135deg,#0b1426,#101d33);">
-            <div class="m360-logo-wrap">
-              <div class="m360-logo-halo" aria-hidden="true"></div>
-              <img src="assets/logo.png" alt="Moneylizer"
-                   class="m360-logo"
-                   loading="eager" decoding="async">
-            </div>
+            <div class="m360-logo-halo" aria-hidden="true"></div>
+            <img src="assets/firstslide.gif" alt="Moneylizer"
+                 class="m360-logo absolute inset-0 w-full h-full object-cover"
+                 loading="eager" decoding="async">
           </div>
 
           <!-- Slide 2: Product Demo (video) -->
           <div class="hero-slide absolute inset-0" data-slide="1" data-duration="video">
             <video id="demoVideo" class="w-full h-full object-cover" muted playsinline preload="auto"
-              src="assets/Demo.mp4"></video>
+              src="assets/Demo2.mp4"></video>
             <div class="absolute inset-0"
               style="background: linear-gradient(to top, rgba(7,18,36,0.4) 0%, transparent 55%);"></div>
             <button id="playToggle"
