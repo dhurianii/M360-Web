@@ -239,7 +239,7 @@
                 <path d="M9 7.5v9l8-4.5-8-4.5Z" fill="#0f172a" />
               </svg>
             </button>
-            <div class="absolute bottom-3 right-3 text-[11px] text-white font-[600]">Intelligence Engine — Live</div>
+           
           </div>
 
           <!-- Slide 3: Logo Carousel.
@@ -424,6 +424,12 @@
       function scheduleAdvance() {
         clearTimer();
         if (hovered) return;
+        if (active === 3) {
+          // Slide 4: timing is owned by the graph slideshow —
+          // it will call goTo(0) after the last graph renders.
+          // Do not schedule an outer timer here.
+          return;
+        }
         const dwell = dwellFor(slides[active]);
         if (dwell === VIDEO_DWELL) {
           // Slide 2: do nothing — 'ended' event will move us forward
@@ -509,7 +515,15 @@
       }
 
       function vizStep() {
-        vizIndex = (vizIndex + 1) % vizImgs.length;
+        const next = vizIndex + 1;
+        if (next >= vizImgs.length) {
+          // All four graphs have been shown once.
+          // Return to slide 1 and stop the cycle — no wrap, no duplicate run.
+          stopVizCycle();
+          goTo(0);
+          return;
+        }
+        vizIndex = next;
         showViz(vizIndex);
       }
 
