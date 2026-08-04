@@ -191,24 +191,6 @@
       0%, 100% { transform: scale(1);    opacity: 0.85; }
       50%      { transform: scale(1.08); opacity: 1;    }
     }
-
-    /* --- Mobile-only hero overrides (< 768px) ---
-       On phones the full-viewport hero is too tall for landscape content,
-       which gets either crushed by object-cover or surrounded by huge
-       whitespace. Shrink the hero to a balanced 4:5 box and switch slides
-       1 & 2 to object-fit: contain so the entire image/video is visible.
-       Desktop is unchanged. */
-    @media (max-width: 767px) {
-      #demo {
-        height: auto !important;
-        aspect-ratio: 4 / 5;
-        max-height: 85vh;
-      }
-      .m360-logo,
-      #demoVideo {
-        object-fit: contain !important;
-      }
-    }
   </style>
 </head>
 
@@ -230,7 +212,7 @@
 
           <!-- Slide 1: Moneylizer PNG logo animation -->
           <div class="hero-slide absolute inset-0 overflow-hidden" data-slide="0" data-duration="5000"
-            style="background: linear-gradient(135deg,#0b1426,#101d33);">
+            style="background: linear-gradient(135deg,#f1f2f4,#eff1f4);">
             <div class="m360-logo-halo" aria-hidden="true"></div>
             <img src="assets/firstslide.gif" alt="Moneylizer"
                  class="m360-logo absolute inset-0 w-full h-full object-cover"
