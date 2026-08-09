@@ -147,6 +147,163 @@
       box-shadow: 0 1px 2px rgba(15,23,42,0.04);
     }
 
+    /* ---------------------------------------------------------------------
+       Slide 3 — Logo scoreboard (4 → 4 → 2).
+       Four black tiles in a row, each holding a logo. Tiles flip up from
+       the bottom with a left-to-right stagger (rotateX, ~80 ms apart).
+       Phase dwell ~5 s; arrow buttons step phases manually.
+       Layout: 4 columns, 3 rows; the 10th logo spans cols 2-3 of row 3
+       so the 2-tile row stays centered under the 4-tile rows.
+    --------------------------------------------------------------------- */
+    .scoreboard {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 18px;
+      box-sizing: border-box;
+      background: #ffffff;
+      perspective: 1400px;
+    }
+    .scoreboard-stage {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .scoreboard-grid {
+      width: 100%;
+      max-width: 1080px;
+      display: grid;
+      gap: clamp(10px, 1.4vw, 18px);
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: auto auto auto;
+      align-items: stretch;
+    }
+    @media (max-width: 720px) {
+      .scoreboard-grid { gap: 10px; }
+    }
+
+    /* Tile: black card with the logo centred inside, taller than wide
+       (matches the reference "2023" tiles). */
+    .score-cell {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      transform-style: preserve-3d;
+      transform-origin: 50% 100%;
+      /* Hidden by default — JS adds .is-in to play the entrance. */
+      opacity: 0;
+      transform: translateY(60%) rotateX(-90deg);
+      will-change: transform, opacity;
+    }
+    .score-cell:nth-child(9) { grid-column: 2; }
+    .score-cell:nth-child(10){ grid-column: 3; }
+    @media (max-width: 720px) {
+      .score-cell { aspect-ratio: 5 / 6; }
+    }
+
+    /* Entrance state. The keyframe is driven by --flip-delay, which JS
+       sets per cell so the left-to-right cascade has the right offset. */
+    .score-cell.is-in {
+      animation: score-in 0.85s cubic-bezier(.18,.95,.32,1.05) both;
+      animation-delay: var(--flip-delay, 0ms);
+    }
+    @keyframes score-in {
+      0%   { opacity: 0; transform: translateY(60%) rotateX(-90deg); }
+      55%  { opacity: 1; }
+      100% { opacity: 1; transform: translateY(0)    rotateX(0deg);   }
+    }
+
+    /* Exit state — tiles drop back down so the next phase can come in. */
+    .score-cell.is-out {
+      animation: score-out 0.45s cubic-bezier(.4,0,.7,.3) both;
+      animation-delay: var(--flip-delay, 0ms);
+    }
+    @keyframes score-out {
+      0%   { opacity: 1; transform: translateY(0)    rotateX(0deg);   }
+      100% { opacity: 0; transform: translateY(40%) rotateX(45deg);  }
+    }
+
+    .score-card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #0f172a;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14% 16%;
+      box-sizing: border-box;
+      box-shadow: 0 10px 22px -10px rgba(15,23,42,0.55),
+                  0 2px 0 rgba(255,255,255,0.04) inset;
+    }
+    .score-card img {
+      max-width: 80%;
+      max-height: 80%;
+      object-fit: contain;
+      /* Most bank logos are dark on white. The tile is near-black, so
+       invert so the logos read correctly inside the tile. */
+      filter: invert(1) brightness(1.05);
+    }
+
+    /* Reduced motion: just fade in/out, no flip. */
+    @media (prefers-reduced-motion: reduce) {
+      .score-cell                { transition: opacity .3s ease; transform: none; }
+      .score-cell.is-in,
+      .score-cell.is-out          { animation: none; opacity: 1; transform: none; }
+    }
+
+    /* Arrows: circle buttons inside the scoreboard, same look as before. */
+    .score-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 9999px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 2px 8px rgba(15,23,42,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #0f172a;
+      transition: background .15s ease, transform .15s ease;
+      z-index: 2;
+    }
+    .score-arrow:hover  { background: #f8fafc; }
+    .score-arrow:active { transform: translateY(-50%) scale(0.96); }
+    .score-arrow.prev   { left: 8px; }
+    .score-arrow.next   { right: 8px; }
+    .score-arrow svg    { width: 16px; height: 16px; }
+
+    /* Dots: 3 phase indicators under the tiles. */
+    .score-dots {
+      position: absolute;
+      bottom: 10px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+    .score-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 9999px;
+      background: #cbd5e1;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .score-dot.active {
+      background: #0f172a;
+      transform: scale(1.25);
+    }
+
     /* Slide 1 — Moneylizer logo animation.
        Entrance: soft scale-in + fade. Idle: very gentle breathing pulse
        and a halo glow that breathes with it. */
@@ -303,22 +460,28 @@
         display: flex !important;
       }
 
-      /* Slide 1 — logo animation: full image, no crop, centered */
+      /* Slide 1 — logo animation: iframe fills the slide edge-to-edge,
+         no cropping; the inner HTML handles its own layout + centering. */
       .hero-slide[data-slide="0"] {
         background: #FFFFFF !important;
       }
-      .hero-slide[data-slide="0"] .m360-logo {
-        position: relative !important;
-        inset: auto !important;
-        width: auto !important;
-        height: auto !important;
-        max-width: 100% !important;
-        max-height: 90% !important;
-        object-fit: contain !important;
+      .hero-slide[data-slide="0"] > div.absolute.inset-0 {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
       }
-      .hero-slide[data-slide="0"] .m360-logo-halo {
-        width: min(360px, 60vw) !important;
-        height: min(360px, 60vw) !important;
+      .hero-slide[data-slide="0"] #logoFrame {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        border: 0 !important;
+        display: block !important;
       }
 
       /* Slide 2 — hero video: contain, no crop, centered */
@@ -338,43 +501,45 @@
         display: none !important;
       }
 
-      /* Slide 3 — logo carousel: fill the slide, scale proportionally */
-      .hero-slide[data-slide="2"] .logo-carousel {
-        position: relative !important;
-        width: 100% !important;
-        height: 100% !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
-        margin: 0 !important;
-        padding: 12px 14px !important;
-        box-sizing: border-box !important;
+      /* Slide 3 — scoreboard flip: fill the slide edge-to-edge, slightly
+         tighter padding on phones so 4+4+2 fits on small screens. */
+      .hero-slide[data-slide="2"] {
         background: #FFFFFF !important;
       }
-      .hero-slide[data-slide="2"] .logo-viewport {
-        padding-right: 0 !important;
+      .hero-slide[data-slide="2"] .scoreboard {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        padding: 12px 14px !important;
       }
-      .hero-slide[data-slide="2"] .logo-card-inner {
-        border-radius: 10px !important;
-        padding: 8px !important;
+      .hero-slide[data-slide="2"] .scoreboard-grid {
+        gap: 8px !important;
       }
 
-      /* Slide 4 — graph showcase: white bg, contain, centered */
+      /* Slide 4 — 3D Financial Cube (iframe): fill the slide edge-to-edge,
+         no padding around it; the cube's own internal canvas handles its
+         own layout. */
       .hero-slide[data-slide="3"] {
         background: #FFFFFF !important;
       }
-      .hero-slide[data-slide="3"] > div.absolute.inset-0.flex.flex-col {
-        position: relative !important;
-        inset: auto !important;
+      .hero-slide[data-slide="3"] > div.absolute.inset-0 {
+        position: absolute !important;
+        inset: 0 !important;
         width: 100% !important;
         height: 100% !important;
         margin: 0 !important;
-        padding: 12px 14px !important;
+        padding: 0 !important;
         box-sizing: border-box !important;
+        overflow: hidden !important;
       }
-      .hero-slide[data-slide="3"] .viz-img {
-        object-fit: contain !important;
+      .hero-slide[data-slide="3"] #cubeFrame {
+        position: absolute !important;
+        inset: 0 !important;
         width: 100% !important;
         height: 100% !important;
+        border: 0 !important;
+        display: block !important;
       }
 
       /* Carousel dots: sit just above the fixed footer */
@@ -409,13 +574,25 @@
         <!-- slide viewport: full-bleed, fills the entire hero area -->
         <div id="slideViewport" class="relative w-full h-full overflow-hidden bg-[#0b1426]">
 
-          <!-- Slide 1: Moneylizer PNG logo animation -->
+<!-- Slide 1: Moneylizer logo animation.
+               Same lazy-load pattern as slide 4's cube: the iframe has
+               data-src but no src, so assets/logo-animation.html is NOT
+               fetched eagerly. The carousel's first visit triggers the
+               mount via startLogoIframe(); warmupLogo() prefetches the
+               bundle after window.load (and again on each idle frame after
+               the carousel completes a full loop, so returning visitors
+               don't wait). -->
           <div class="hero-slide absolute inset-0 overflow-hidden" data-slide="0" data-duration="5000"
             style="background: linear-gradient(135deg,#f1f2f4,#f5f6f8);">
-            <div class="m360-logo-halo" aria-hidden="true"></div>
-            <img src="assets/firstslide.gif" alt="Moneylizer"
-                 class="m360-logo absolute inset-0 w-full h-full object-cover"
-                 loading="eager" decoding="async">
+            <div class="absolute inset-0">
+              <iframe
+                id="logoFrame"
+                data-src="assets/logo-animation.html"
+                title="Moneylizer logo animation"
+                loading="lazy"
+                style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#f1f2f4;display:block;"
+              ></iframe>
+            </div>
           </div>
 
           <!-- Slide 2: Product Demo (video) -->
@@ -438,36 +615,51 @@
            
           </div>
 
-          <!-- Slide 3: Logo Carousel.
-               Logos are rendered from the LOGOS array in the script below —
-               add or remove entries to change the set. Inline SVGs are used as
-               placeholders; swap each entry's `svg` for an <img src=...> or a
-               real SVG string later. -->
-          <div class="hero-slide absolute inset-0" data-slide="2" data-duration="5000" style="background:#ffffff;">
-            <div class="logo-carousel">
-              <button class="logo-arrow prev" id="logoPrev" aria-label="Previous logos" type="button">
+          <!-- Slide 3: Scoreboard flip animation.
+               10 logos laid out as 4 + 4 + 2. Each row of 4 flips in a
+               90 ms-cascaded stagger; every 5 s the cycle advances to the
+               next phase. Arrow buttons let the user step through manually
+               (and reset the auto timer). The 3 dot indicators at the
+               bottom show which phase is currently displayed. -->
+          <div class="hero-slide absolute inset-0" data-slide="2" data-duration="15500" style="background:#ffffff;">
+            <div class="scoreboard" id="scoreboard">
+              <button class="score-arrow prev" id="scorePrev" aria-label="Previous phase" type="button">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
               </button>
-              <div class="logo-viewport">
-                <div class="logo-track" id="logoTrack"></div>
+
+              <div class="scoreboard-stage">
+                <div class="scoreboard-grid" id="scoreGrid"></div>
               </div>
-              <button class="logo-arrow next" id="logoNext" aria-label="Next logos" type="button">
+
+              <button class="score-arrow next" id="scoreNext" aria-label="Next phase" type="button">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </button>
+
+              <div class="score-dots" id="scoreDots"></div>
             </div>
           </div>
 
-          <!-- Slide 4: Financial Visualizations (automatic slideshow) -->
+<!-- Slide 4: 3D Financial Cube Animation.
+               The cube is a self-contained page (assets/financial-cube.html)
+               built from the standalone 3d-financial-cube-animation prototype.
+               We mount it as an iframe so the heavy Three.js bundle is loaded
+               only when this slide becomes visible, and stays isolated from
+               the rest of the hero page. The cube URL lives in data-src so the
+               iframe is NOT fetched eagerly on page load — first paint stays
+               light. JS (startCubeIframe) copies data-src into src only when
+               the carousel lands on slide 4, and a one-time <link rel=prefetch>
+               (added in the warm-up hook below) speculatively fetches the
+               bundle after window.load so it's ready when slide 4 shows. -->
           <div class="hero-slide absolute inset-0" data-slide="3" data-duration="12000" style="background:#ffffff;">
-            <div class="absolute inset-0 flex flex-col p-4 sm:p-5">
-              <!-- Graph preview container — fixed height, all 4 graphs stacked
-                   absolutely; the active one fades in. Prevents any layout jump. -->
-              <div id="vizGraph" class="flex-1 min-h-0 mt-3 sm:mt-4 rounded-[14px] border border-slate-200 bg-white overflow-hidden relative">
-                <img id="vizGraphImg" class="viz-img absolute inset-0 w-full h-full object-contain opacity-100 transition-opacity duration-500 ease-in-out" src="assets/graphs/sankey.jpg" alt="Sankey">
-                <img class="viz-img absolute inset-0 w-full h-full object-contain opacity-0 transition-opacity duration-500 ease-in-out" src="assets/graphs/multibar.jpg" alt="Multi-Bar">
-                <img class="viz-img absolute inset-0 w-full h-full object-contain opacity-0 transition-opacity duration-500 ease-in-out" src="assets/graphs/timeline.jpeg" alt="Timeline">
-                <img class="viz-img absolute inset-0 w-full h-full object-contain opacity-0 transition-opacity duration-500 ease-in-out" src="assets/graphs/donut.jpg" alt="Donut Map">
-              </div>
+            <div class="absolute inset-0">
+              <iframe
+                id="cubeFrame"
+                data-src="assets/financial-cube.html"
+                title="Financial Analytics Cube"
+                loading="lazy"
+                style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#ffffff;display:block;"
+                allow="autoplay; fullscreen"
+              ></iframe>
             </div>
           </div>
 
@@ -502,102 +694,235 @@
       const playToggle = document.getElementById('playToggle');
       const pauseIcon = document.getElementById('pauseIcon');
       const playIcon = document.getElementById('playIcon');
-      const vizTabs = document.getElementById('vizTabs');
-      const vizGraphTitle = document.getElementById('vizGraphTitle');
-      const vizGraphImg = document.getElementById('vizGraphImg');
 
-      // Tab key -> graph image path (assets/graphs/*.jpg).
-      const VIZ_SOURCES = {
-        sankey:   'assets/graphs/sankey.jpg',
-        multibar:     'assets/graphs/multibar.jpg',
-        timeline: 'assets/graphs/timeline.jpeg',
-        donut:  'assets/graphs/donut.jpg',
-      };
-
-      const DEFAULT_DWELL = 5000; // ms — Slides 1, 3, 4
+      const DEFAULT_DWELL = 5000; // ms — Slides 1, 3
+      const CUBE_DWELL_MS = 12000; // ms — Slide 4 (cube is the whole show)
       const VIDEO_DWELL = 'video'; // sentinel for slide 2
 
-      // ---- Slide 3: logo carousel (data-driven) ----
-      // Edit this single array to add or remove logos. `logo` is the
-      // image path (relative to the site root). Drop your files into
-      // assets/banks/ (or anywhere else) and point to them here.
-      // Twelve entries give 2 pages on desktop (2x4), 2 pages on
-      // tablet (2x3), and 3 pages on mobile (2x2).
-      const LOGOS = [
-        { name: 'Logo 1',  logo: 'assets/banks/SBI.png' },
-        { name: 'Logo 2',  logo: 'assets/banks/HDFC.jpg' },
-        { name: 'Logo 3',  logo: 'assets/banks/AXIS.png' },
-        { name: 'Logo 4',  logo: 'assets/banks/ICICI.png' },
-        { name: 'Logo 5',  logo: 'assets/banks/GPAY.jpg' },
-        { name: 'Logo 6',  logo: 'assets/banks/phonepay.png' },
-        { name: 'Logo 7',  logo: 'assets/banks/Samati.png' },
-        { name: 'Logo 8',  logo: 'assets/banks/MF.jpg' },
-        { name: 'Logo 9',  logo: 'assets/banks/Induslnd.png' },
-        { name: 'Logo 10', logo: 'assets/banks/Bhim.png' },
+      // ---- Slide 3: Scoreboard flip animation (4 → 4 → 2 logos).
+      // Each phase shows up to 4 cards. Phase A: logos 1-4,
+      // phase B: logos 5-8, phase C: logos 9-10 (only 2 in this row).
+      // ---- Slide 3: Logo scoreboard (4 → 4 → 2 logos).
+      // 10 black tiles (one logo each) arranged in 3 rows of 4-4-2.
+      // Each phase plays a "flip-up from the bottom" entrance on its
+      // 4 (or 2) tiles, left-to-right with a small per-cell delay. Tiles
+      // hold for PHASE_DWELL_MS, then drop down before the next phase
+      // flips up. Auto-advances every 5 s; arrow buttons / dot indicators
+      // step phases manually and reset the auto timer. ----
+      const SCORE_LOGOS = [
+        { name: 'State Bank of India', logo: 'assets/banks/SBI.png' },
+        { name: 'HDFC Bank',           logo: 'assets/banks/HDFC.jpg' },
+        { name: 'Axis Bank',           logo: 'assets/banks/AXIS.png' },
+        { name: 'ICICI Bank',          logo: 'assets/banks/ICICI.png' },
+        { name: 'Google Pay',          logo: 'assets/banks/GPAY.jpg' },
+        { name: 'PhonePe',             logo: 'assets/banks/phonepay.png' },
+        { name: 'Samsung Wallet',      logo: 'assets/banks/Samati.png' },
+        { name: 'Mutual Funds',        logo: 'assets/banks/MF.jpg' },
+        { name: 'IndusInd Bank',       logo: 'assets/banks/Induslnd.png' },
+        { name: 'BHIM UPI',            logo: 'assets/banks/Bhim.png' },
       ];
 
-      const logoTrack   = document.getElementById('logoTrack');
-      const logoPrevBtn = document.getElementById('logoPrev');
-      const logoNextBtn = document.getElementById('logoNext');
-      let logoPage      = 0;
+      const PHASES = [4, 4, 2];                 // tile counts per phase
+      const PHASE_DWELL_MS    = 5000;           // hold before flipping to next phase
+      const CARD_IN_STAGGER   = 90;             // delay between tiles within a row
+      const CARD_OUT_STAGGER  = 50;             // faster cascade when tiles drop
+      const CARD_IN_DURATION  = 850;            // matches CSS keyframe duration
+      const CARD_OUT_DURATION = 450;            // matches CSS keyframe duration
 
-      function colsPerPage() {
-        // Prefer the actual carousel width — falls back to window width
-        // if the carousel isn't measurable yet (e.g. before first paint).
-        const carousel = document.querySelector('.logo-carousel');
-        const w = (carousel && carousel.clientWidth) || window.innerWidth;
-        if (w >= 760) return 4; // 2x4 desktop
-        if (w >= 520) return 3; // 2x3 tablet
-        return 2;               // 2x2 mobile
+      const scoreGrid = document.getElementById('scoreGrid');
+      const scoreDots = document.getElementById('scoreDots');
+      const scorePrev = document.getElementById('scorePrev');
+      const scoreNext = document.getElementById('scoreNext');
+
+      let scorePhase        = 0;
+      let scoreTimer        = null;
+      let scoreTimeout      = null;             // one-shot delay between exit and entrance
+      let scoreCardsBuilt   = false;
+      let scoreEntering     = false;           // debounce so two advances can't overlap
+
+      function buildScoreCards() {
+        if (!scoreGrid || scoreCardsBuilt) return;
+        scoreGrid.innerHTML = SCORE_LOGOS.map((l, i) => `
+          <div class="score-cell" data-idx="${i}" aria-hidden="true">
+            <div class="score-card">
+              <img src="${l.logo}" alt="${l.name}" loading="lazy" decoding="async">
+            </div>
+          </div>
+        `).join('');
+        scoreCardsBuilt = true;
       }
 
-      function applyLogoLayout() {
-        if (!logoTrack) return;
-        const cols       = colsPerPage();
-        const totalLogos = LOGOS.length;
-        const totalCols  = Math.max(1, Math.ceil(totalLogos / 2));
-        const totalPages = Math.max(1, Math.ceil(totalLogos / (cols * 2)));
-        if (logoPage >= totalPages) logoPage = totalPages - 1;
-        if (logoPage < 0)           logoPage = 0;
-
-        // Each grid column is 1/totalCols of the track; the track is
-        // (totalCols / cols) viewports wide so a translate of one
-        // viewport-width advances exactly one page.
-        logoTrack.style.gridAutoColumns = (100 / totalCols) + '%';
-        logoTrack.style.width           = ((totalCols / cols) * 100) + '%';
-        logoTrack.style.transform       = 'translateX(-' + ((logoPage * cols / totalCols) * 100) + '%)';
-
-        if (logoPrevBtn) logoPrevBtn.disabled = (logoPage === 0);
-        if (logoNextBtn) logoNextBtn.disabled = (logoPage >= totalPages - 1);
-      }
-
-      function renderLogos() {
-        if (!logoTrack) return;
-        logoTrack.innerHTML = LOGOS.map(l =>
-          '<div class="logo-card"><div class="logo-card-inner">' +
-            '<img class="logo-img" src="' + l.logo + '" alt="' + l.name + '" loading="lazy" decoding="async">' +
-          '</div></div>'
+      function buildScoreDots() {
+        if (!scoreDots) return;
+        scoreDots.innerHTML = PHASES.map((_, i) =>
+          `<span class="score-dot${i === scorePhase ? ' active' : ''}" data-phase="${i}"></span>`
         ).join('');
-        applyLogoLayout();
+        scoreDots.querySelectorAll('.score-dot').forEach(dot => {
+          dot.addEventListener('click', () => {
+            const target = parseInt(dot.dataset.phase, 10);
+            if (target !== scorePhase) jumpToScore(target);
+          });
+        });
       }
 
-      if (logoTrack) {
-        renderLogos();
-        logoPrevBtn && logoPrevBtn.addEventListener('click', () => {
-          if (logoPage > 0) { logoPage--; applyLogoLayout(); }
-        });
-        logoNextBtn && logoNextBtn.addEventListener('click', () => {
-          const cols       = colsPerPage();
-          const totalPages = Math.max(1, Math.ceil(LOGOS.length / (cols * 2)));
-          if (logoPage < totalPages - 1) { logoPage++; applyLogoLayout(); }
-        });
-        // Recompute columns / widths on resize
-        let resizeRaf = 0;
-        window.addEventListener('resize', () => {
-          cancelAnimationFrame(resizeRaf);
-          resizeRaf = requestAnimationFrame(applyLogoLayout);
+      // Visible cards in a phase: phase A = [0..3], B = [4..7], C = [8..9].
+      function visibleCardIndices(phase) {
+        const start = PHASES.slice(0, phase).reduce((s, n) => s + n, 0);
+        const count = PHASES[phase];
+        return Array.from({ length: count }, (_, i) => start + i);
+      }
+
+      function setDots(phase) {
+        if (!scoreDots) return;
+        scoreDots.querySelectorAll('.score-dot').forEach((dot, i) => {
+          dot.classList.toggle('active', i === phase);
         });
       }
+
+      function setArrowDisabled(phase) {
+        if (scorePrev) scorePrev.disabled = (phase === 0);
+        if (scoreNext) scoreNext.disabled = (phase === PHASES.length - 1);
+      }
+
+      // Play the "drop down + fade out" animation on cells that belong to
+      // the previous phase, and the "flip up from bottom" entrance on
+      // cells that belong to the new phase. Per-cell --flip-delay drives
+      // the cascade.
+      function transitionTo(newPhase) {
+        if (!scoreGrid) return;
+        scoreEntering = true;
+        const newVisible = new Set(visibleCardIndices(newPhase));
+
+        scoreGrid.querySelectorAll('.score-cell').forEach(cell => {
+          const idx = parseInt(cell.dataset.idx, 10);
+          const wasVisible = !cell.classList.contains('is-idle') && !cell.classList.contains('is-out');
+
+          // Cells leaving: play the exit animation.
+          if (wasVisible && !newVisible.has(idx)) {
+            const exitOrder = [...cell.parentElement.querySelectorAll('.score-cell')]
+              .filter(c => !c.classList.contains('is-out') && !c.classList.contains('is-idle'))
+              .indexOf(cell);
+            cell.style.setProperty('--flip-delay', (exitOrder * CARD_OUT_STAGGER) + 'ms');
+            cell.classList.remove('is-in');
+            cell.classList.add('is-out');
+            // After the exit animation finishes, hide it.
+            setTimeout(() => {
+              cell.classList.add('is-idle');
+              cell.style.display = 'none';
+            }, CARD_OUT_DURATION + exitOrder * CARD_OUT_STAGGER + 50);
+            return;
+          }
+
+          // Cells staying: no-op.
+          if (wasVisible && newVisible.has(idx)) return;
+
+          // Cells entering: position them in the layout, set stagger, play in.
+          if (!wasVisible && newVisible.has(idx)) {
+            cell.style.display = '';
+            cell.classList.remove('is-idle', 'is-out');
+            const enterOrder = [...newVisible].indexOf(idx);
+            cell.style.setProperty('--flip-delay', (enterOrder * CARD_IN_STAGGER) + 'ms');
+            // Force reflow so the entrance animation re-triggers cleanly.
+            void cell.offsetWidth;
+            cell.classList.add('is-in');
+          }
+        });
+
+        setDots(newPhase);
+        setArrowDisabled(newPhase);
+
+        // Unlock advanceScore once the entrance settles (longest stagger + duration).
+        const maxStagger = (Math.max(...newVisible) - Math.min(...newVisible)) * CARD_IN_STAGGER;
+        if (scoreTimeout) clearTimeout(scoreTimeout);
+        scoreTimeout = setTimeout(() => {
+          scoreEntering = false;
+          scheduleNextAdvance();
+        }, CARD_IN_DURATION + maxStagger + 50);
+      }
+
+      // Auto-tick callback: advance to next phase and schedule the next tick.
+      function scheduleNextAdvance() {
+        if (scoreTimer) { clearTimeout(scoreTimer); scoreTimer = null; }
+        scoreTimer = setTimeout(advanceScore, PHASE_DWELL_MS);
+      }
+      function advanceScore() {
+        if (scoreEntering) return;
+        const next = (scorePhase + 1) % PHASES.length;
+        scorePhase = next;
+        transitionTo(next);
+      }
+
+      // Manual navigation (arrow / dot): jump to the given phase and restart
+      // the dwell timer. Cancels any in-flight transition.
+      function jumpToScore(phase) {
+        if (scoreEntering) {
+          // Force-finish the current entrance immediately by skipping its unlock.
+          scoreEntering = false;
+          if (scoreTimeout) { clearTimeout(scoreTimeout); scoreTimeout = null; }
+        }
+        scorePhase = phase;
+        if (scoreTimer) { clearTimeout(scoreTimer); scoreTimer = null; }
+        transitionTo(phase);
+      }
+
+      function startScoreCycle() {
+        stopScoreCycle();
+        if (!scoreCardsBuilt) buildScoreCards();
+        if (!scoreDots || !scoreDots.children.length) buildScoreDots();
+        // Reset every tile to idle.
+        if (scoreGrid) {
+          scoreGrid.querySelectorAll('.score-cell').forEach(cell => {
+            cell.classList.remove('is-in', 'is-out');
+            cell.classList.add('is-idle');
+            cell.style.display = 'none';
+          });
+        }
+        scorePhase = 0;
+        // First phase entrance — no exit to play.
+        scoreEntering = true;
+        const firstVisible = visibleCardIndices(0);
+        if (scoreGrid) {
+          scoreGrid.querySelectorAll('.score-cell').forEach(cell => {
+            const idx = parseInt(cell.dataset.idx, 10);
+            if (firstVisible.includes(idx)) {
+              cell.style.display = '';
+              cell.classList.remove('is-idle');
+              cell.style.setProperty('--flip-delay', (firstVisible.indexOf(idx) * CARD_IN_STAGGER) + 'ms');
+              void cell.offsetWidth;
+              cell.classList.add('is-in');
+            }
+          });
+        }
+        setDots(0);
+        setArrowDisabled(0);
+        // After the entrance plays, schedule the auto-advance.
+        if (scoreTimeout) clearTimeout(scoreTimeout);
+        scoreTimeout = setTimeout(() => {
+          scoreEntering = false;
+          scheduleNextAdvance();
+        }, CARD_IN_DURATION + (firstVisible.length - 1) * CARD_IN_STAGGER + 50);
+      }
+
+      function stopScoreCycle() {
+        if (scoreTimer)   { clearTimeout(scoreTimer);   scoreTimer   = null; }
+        if (scoreTimeout) { clearTimeout(scoreTimeout); scoreTimeout = null; }
+        scoreEntering = false;
+        // Reset all tiles to idle so the next startScoreCycle is clean.
+        if (scoreGrid) {
+          scoreGrid.querySelectorAll('.score-cell').forEach(cell => {
+            cell.classList.remove('is-in', 'is-out');
+            cell.classList.add('is-idle');
+            cell.style.display = 'none';
+          });
+        }
+      }
+
+      scorePrev && scorePrev.addEventListener('click', () => {
+        if (scorePhase > 0) jumpToScore(scorePhase - 1);
+      });
+      scoreNext && scoreNext.addEventListener('click', () => {
+        if (scorePhase < PHASES.length - 1) jumpToScore(scorePhase + 1);
+      });
 
       let active = 0;
       let timer = null;
@@ -610,7 +935,12 @@
 
       function dwellFor(slideEl) {
         if (!slideEl) return DEFAULT_DWELL;
-        return slideEl.dataset.duration === VIDEO_DWELL ? VIDEO_DWELL : DEFAULT_DWELL;
+        if (slideEl.dataset.duration === VIDEO_DWELL) return VIDEO_DWELL;
+        // Numeric data-duration overrides DEFAULT_DWELL — used by slide 3
+        // (scoreboard) so all 3 phases have time to play.
+        const override = parseInt(slideEl.dataset.duration, 10);
+        if (!isNaN(override) && override !== DEFAULT_DWELL) return override;
+        return DEFAULT_DWELL;
       }
 
       function clearTimer() {
@@ -621,9 +951,8 @@
         clearTimer();
         if (hovered) return;
         if (active === 3) {
-          // Slide 4: timing is owned by the graph slideshow —
-          // it will call goTo(0) after the last graph renders.
-          // Do not schedule an outer timer here.
+          // Slide 4: cube is the whole show. Hold for CUBE_DWELL_MS then loop.
+          timer = setTimeout(() => goTo(0), CUBE_DWELL_MS);
           return;
         }
         const dwell = dwellFor(slides[active]);
@@ -660,11 +989,27 @@
           try { video.currentTime = 0; } catch (e) { /* ignore */ }
         }
 
-        // Slide 4: start/stop the automatic graph slideshow
-        if (active === 3) {
-          startVizCycle();
+        // Slide 1: Moneylizer logo animation (lazy iframe).
+        // First visit mounts it; subsequent visits cache-bust so the
+        // letter-by-letter reveal replays.
+        if (active === 0) {
+          startLogoIframe();
+        }
+
+        // Slide 3: scoreboard flip (4-4-2). Auto-rotate on entry, stop
+        // when leaving so the per-phase timer doesn't burn cycles in
+        // the background.
+        if (active === 2) {
+          startScoreCycle();
         } else {
-          stopVizCycle();
+          stopScoreCycle();
+        }
+
+        // Slide 4: the 3D cube runs inside an iframe. Re-load it whenever
+        // we land on this slide so its entrance animation replays from the
+        // start (small, distant, then scales in). Leave it mounted otherwise.
+        if (active === 3) {
+          startCubeIframe();
         }
 
         if (manual) clearTimer();          // user-initiated jump cancels any pending tick
@@ -692,52 +1037,70 @@
       viewport.addEventListener('mouseenter', () => { hovered = true; clearTimer(); });
       viewport.addEventListener('mouseleave', () => { hovered = false; scheduleAdvance(); });
 
-      // ---- slide 4: automatic graph slideshow (5s per graph, smooth fade) ----
-      // The .viz-img elements are stacked in the fixed-height #vizGraph
-      // container; we crossfade between them by toggling opacity.
-      // The cycle resets to index 0 every time the user lands on slide 4,
-      // so each visit always starts with the Sankey graph.
-      const vizImgs = document.querySelectorAll('.viz-img');
-      let vizIndex = 0;
-      let vizTimer = null;
-      const VIZ_DWELL_MS = 3000;
-      const FADE_MS = 500;
+      // ---- slide 4: 3D Financial Cube (LAZY iframe).
+      // The iframe has data-src but no src, so the browser does NOT fetch
+      // assets/financial-cube.html on page load — first paint stays light.
+      // startCubeIframe() copies data-src into src on the FIRST visit to
+      // slide 4, then cache-busts on every subsequent visit so the cube's
+      // entrance animation replays. After window.load fires, we also drop
+      // in a <link rel=prefetch> so the cube downloads in the idle window
+      // before the carousel naturally reaches slide 4 — by the time slide
+      // 4 is shown, the bundle is already in the HTTP cache. ----
+      const cubeFrame  = document.getElementById('cubeFrame');
+      const CUBE_URL   = 'assets/financial-cube.html';
+      let cubeMounted  = false;
 
-      function showViz(i) {
-        if (!vizImgs.length) return;
-        vizImgs.forEach((img, idx) => {
-          img.style.opacity = idx === i ? '1' : '0';
-        });
+      function startCubeIframe() {
+        if (!cubeFrame) return;
+        // Cache-bust on every entry — guarantees a clean Three.js /
+        // R3F internal state and replays the entrance animation.
+        const url = CUBE_URL + (cubeMounted ? '?t=' + Date.now() : '');
+        cubeFrame.src = url;
+        cubeMounted = true;
       }
 
-      function vizStep() {
-        const next = vizIndex + 1;
-        if (next >= vizImgs.length) {
-          // All four graphs have been shown once.
-          // Return to slide 1 and stop the cycle — no wrap, no duplicate run.
-          stopVizCycle();
-          goTo(0);
-          return;
-        }
-        vizIndex = next;
-        showViz(vizIndex);
+      // ---- shared prefetch helper.
+      // Cheap: only runs if the browser supports <link rel=prefetch> AND
+      // we're not on a save-data / 2g connection. Safe to call multiple
+      // times — same URL is deduped by the browser's HTTP cache. ----
+      function prefetch(url) {
+        try {
+          const conn = navigator.connection || navigator.webkitConnection;
+          if (conn && (conn.saveData || /(^|-)(2g|slow-2g)(-|$)/.test(conn.effectiveType || ''))) return;
+          if (!('relList' in HTMLLinkElement.prototype)) return;
+          if (!document.createElement('link').relList.supports('prefetch')) return;
+          const link = document.createElement('link');
+          link.rel  = 'prefetch';
+          link.as   = 'document';
+          link.href = url;
+          document.head.appendChild(link);
+        } catch (e) { /* ignore */ }
       }
 
-      function startVizCycle() {
-        stopVizCycle();
-        if (!vizImgs.length) return;
-        vizIndex = 0;
-        showViz(0);
-        vizTimer = setInterval(vizStep, VIZ_DWELL_MS);
-      }
+      // ---- slide 1: Moneylizer logo animation (LAZY iframe). ----
+      const logoFrame  = document.getElementById('logoFrame');
+      const LOGO_URL   = 'assets/logo-animation.html';
+      let logoMounted  = false;
 
-      function stopVizCycle() {
-        if (vizTimer) { clearInterval(vizTimer); vizTimer = null; }
+      function startLogoIframe() {
+        if (!logoFrame) return;
+        // First visit: copy data-src into src. Later visits: cache-bust so
+        // the letter-by-letter animation replays from the start.
+        const url = LOGO_URL + (logoMounted ? '?t=' + Date.now() : '');
+        logoFrame.src = url;
+        logoMounted = true;
       }
 
       // ---- init ----
       slides.forEach(s => { s.style.transition = 'opacity .5s ease'; });
       goTo(0);
+      // Both iframes are lazy — page load stays fast. After window.load
+      // we speculatively prefetch the two bundles so they're cached before
+      // the carousel naturally reaches slide 4 (cube) and on every
+      // subsequent loop back to slide 1 (logo).
+      function warmup() { prefetch(LOGO_URL); prefetch(CUBE_URL); }
+      if (document.readyState === 'complete') warmup();
+      else window.addEventListener('load', warmup, { once: true });
     })();
   </script>
 
