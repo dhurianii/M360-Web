@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supported Statement Sources</title>
+  <!-- This page is loaded as an iframe from /index.html into /assets/slide3-sources.html.
+       Without an explicit base, the browser resolves relative paths like
+       "assets/banks/hdfc bank.png" against the iframe's own URL, producing
+       "/assets/assets/banks/..." (one "assets" too many). Setting base to ".."
+       makes those relative paths resolve against the site root, which is
+       where the banks/ folder actually lives. -->
+  <base href="../">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      background: #ffffff;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #0f172a;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow: hidden;
+    }
+
+    /* The page-level wrapper. Hosts the title block at the top of the
+       slide and the 4 category rows beneath it. */
+    .sources {
+      width: 100%;
+      height: 100%;
+      padding: clamp(14px, 2.5vh, 28px) clamp(14px, 3vw, 36px);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(12px, 1.8vh, 22px);
+      overflow: hidden;
+    }
+
+    /* Title block — sits at the top of the slide, centred. */
+    .sources-head {
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .sources-head h2 {
+      font-size: clamp(20px, 2.6vw, 36px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: #0f172a;
+    }
+    .sources-head h2 .accent {
+      background: linear-gradient(101deg, #1e3a8a 0%, #2563eb 50%, #1684b8 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: #2563eb;
+    }
+    .sources-head p {
+      margin-top: 6px;
+      font-size: clamp(11px, 1.05vw, 14px);
+      color: #64748b;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+    }
+
+    /* The 4 category rows: edge-to-edge grid of full-width cards. */
+    .sources-grid {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: repeat(4, 1fr);
+      gap: clamp(8px, 1.1vh, 14px);
+    }
+
+    /* Single row: a unified white card with a tinted left panel + a
+       right-side logo grid. */
+    .src-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      background: #ffffff;
+      border: 1px solid #e7ecf3;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+      min-height: 0;
+    }
+
+    /* Category panel (left side) — keeps category colour, icon, name and
+       a short description. Distinct background so it reads as a separate
+       module from the logo grid. */
+    .src-cat {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border-right: 1px solid #eef1f6;
+      background: var(--cat-bg, #f8fafc);
+      transition: background .2s ease;
+    }
+    .src-cat-icon {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: var(--cat-icon-bg, #ffffff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    }
+    .src-cat-icon svg {
+      width: 26px;
+      height: 26px;
+      color: var(--cat-icon-color, #2563eb);
+    }
+    .src-cat-text { min-width: 0; }
+    .src-cat-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .src-cat-desc {
+      margin-top: 4px;
+      font-size: 11.5px;
+      color: #64748b;
+      line-height: 1.4;
+      font-weight: 500;
+    }
+
+    /* Logo grid (right side) — horizontally arranged tiles, shrink on
+       smaller screens, wrap on mobile. */
+    .src-tiles {
+      display: grid;
+      grid-template-columns: repeat(var(--cols, 6), minmax(0, 1fr));
+      gap: 10px;
+      padding: 12px 14px;
+      min-width: 0;
+    }
+
+    .src-tile {
+      position: relative;
+      background: #ffffff;
+      border: 1px solid #e7ecf3;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 8px;
+      gap: 6px;
+      cursor: default;
+      transition: transform .18s cubic-bezier(.22,1,.36,1),
+                  box-shadow .18s ease,
+                  border-color .18s ease;
+      min-height: 0;
+    }
+    .src-tile:hover {
+      transform: translateY(-2px) scale(1.012);
+      border-color: #c7d7f5;
+      box-shadow: 0 8px 18px -10px rgba(15, 23, 42, 0.18),
+                  0 2px 4px rgba(15, 23, 42, 0.04);
+    }
+
+    /* Image tile (real logos). Centered, contained, never stretched. */
+    .src-tile-img {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .src-tile-img img {
+      max-width: 78%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+    .src-tile-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: #475569;
+      letter-spacing: -0.005em;
+      text-align: center;
+      line-height: 1.2;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Inline SVG tile (text/brand mark fallback). Wraps the SVG so the
+       same scale rules apply to image tiles. */
+    .src-tile-svg {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .src-tile-svg svg {
+      max-width: 78%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      display: block;
+    }
+
+    /* Placeholder tile (mutual funds "+"). */
+    .src-tile.ph {
+      border-style: dashed;
+      border-color: #d4dbe6;
+      background: #fafbfd;
+    }
+    .src-tile.ph:hover {
+      border-color: #2563eb;
+      background: #f8fafc;
+    }
+    .src-tile.ph .src-tile-img {
+      color: #94a3b8;
+    }
+    .src-tile.ph:hover .src-tile-img {
+      color: #2563eb;
+    }
+
+    /* ----------------------------------------------------------------
+       TABLET (≤ 980px) — shrink the category column and tile gaps
+       ---------------------------------------------------------------- */
+    @media (max-width: 980px) {
+      .src-row { grid-template-columns: 220px 1fr; }
+      .src-cat { padding: 12px 14px; gap: 12px; }
+      .src-cat-icon { width: 40px; height: 40px; }
+      .src-cat-icon svg { width: 22px; height: 22px; }
+      .src-cat-name { font-size: 13px; }
+      .src-cat-desc { font-size: 10.5px; }
+      .src-tiles { padding: 10px 12px; gap: 8px; }
+    }
+
+    /* ----------------------------------------------------------------
+       MOBILE (≤ 720px) — compact side-by-side layout. Each row must
+       fit in ~145px so all 4 rows + title fit inside the hero stage.
+       ---------------------------------------------------------------- */
+    @media (max-width: 720px) {
+      .sources { padding: 8px 10px; gap: 6px; }
+      .sources-head { margin-bottom: 4px; }
+      .sources-head h2 { font-size: 15px; line-height: 1.1; }
+      .sources-head p { display: none; }
+
+      .sources-grid { gap: 6px; }
+
+      .src-row {
+        grid-template-columns: 110px 1fr;
+        border-radius: 10px;
+      }
+      .src-cat {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 4px;
+        padding: 8px 10px;
+      }
+      .src-cat-icon { width: 22px; height: 22px; border-radius: 5px; }
+      .src-cat-icon svg { width: 13px; height: 13px; }
+      .src-cat-name { font-size: 10.5px; line-height: 1.1; }
+      .src-cat-desc { display: none; }
+
+      .src-tiles {
+        grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+        gap: 5px;
+        padding: 7px 8px;
+      }
+      .src-tile {
+        padding: 5px 4px;
+        gap: 3px;
+        border-radius: 7px;
+      }
+      .src-tile-name { font-size: 8.5px; line-height: 1.1; }
+      .src-tile-svg svg { max-width: 88%; }
+      .src-tile-img img { max-width: 88%; }
+    }
+
+    /* Very small phones — narrower category column & smaller tiles */
+    @media (max-width: 420px) {
+      .sources { padding: 6px 8px; gap: 5px; }
+      .src-row { grid-template-columns: 92px 1fr; }
+      .src-cat { padding: 6px 8px; }
+      .src-cat-name { font-size: 9.5px; }
+      .src-tiles { padding: 6px 7px; gap: 4px; }
+      .src-tile { padding: 4px 3px; }
+    }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .src-tile { transition: none; }
+      .src-tile:hover { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sources" id="sourcesRoot">
+    <header class="sources-head">
+      <h2>Supported <span class="accent">Statement Sources</span></h2>
+      <p>Connect and import your financial statements from 50+ trusted sources</p>
+    </header>
+    <div class="sources-grid" id="sourcesGrid"></div>
+  </div>
+
+  <script>
+    /* =================================================================
+       Structured data for the 4 category rows.
+       To add/remove a bank, edit the matching array below — no HTML to
+       touch. Tiles regenerate automatically.
+
+       Each provider object has:
+         - id:    unique slug (used as a stable key)
+         - name:  display name shown below the logo
+         - logo:  string path → real logo file (preferred), OR
+         - svg:   inline SVG markup → fallback when no file exists
+         - ph:    true for placeholder tiles (mutual funds row)
+
+       Each category has:
+         - id:    unique slug
+         - name:  category title
+         - desc:  short description
+         - icon:  inline SVG for the left-panel icon
+         - bg:    left panel background tint
+         - iconBg: icon container background
+         - iconColor: icon stroke colour
+         - cols:  desktop grid column count (tiles to fit in one row)
+         - providers: array of provider objects
+       ================================================================= */
+    const CATEGORIES = [
+      {
+        id: 'credit-cards',
+        name: 'Credit Cards',
+        desc: 'Import statements from major credit card providers',
+        bg: 'linear-gradient(135deg, #eef4ff 0%, #f5f8ff 100%)',
+        iconBg: '#ffffff',
+        iconColor: '#2563eb',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="13" rx="2.5"/><rect x="2.5" y="9.5" width="19" height="2.2" fill="currentColor" stroke="none" opacity="0.85"/><line x1="6.5" y1="14.5" x2="10.5" y2="14.5"/></svg>',
+        cols: 6,
+        providers: [
+          { id: 'hdfc-cc',     name: 'HDFC Bank',   logo: 'assets/banks/hdfc bank.png' },
+          { id: 'sbi-cc',      name: 'State Bank of India', logo: 'assets/banks/SBI.png' },
+          { id: 'axis-cc',     name: 'Axis Bank',   logo: 'assets/banks/AXIS.png' },
+          { id: 'icici-cc',    name: 'ICICI Bank',  logo: 'assets/banks/ICICI.png' },
+          { id: 'indusind-cc', name: 'IndusInd Bank', logo: 'assets/banks/Induslnd.png' },
+          { id: 'idfc-cc',     name: 'IDFC FIRST Bank', svg: idfcSvg() },
+        ],
+      },
+      {
+        id: 'savings-ac',
+        name: 'Savings Accounts',
+        desc: 'Import savings account statements from leading banks',
+        bg: 'linear-gradient(135deg, #e8f7ee 0%, #f1faf3 100%)',
+        iconBg: '#ffffff',
+        iconColor: '#059669',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5"/><path d="M5 10.5V19a1 1 0 0 0 1 1h4v-5.5h4V20h4a1 1 0 0 0 1-1v-8.5"/><line x1="10" y1="10.5" x2="14" y2="10.5" opacity="0.5"/></svg>',
+        cols: 5,
+        providers: [
+          { id: 'hdfc-sa',  name: 'HDFC Bank',  logo: 'assets/banks/hdfc bank.png' },
+          { id: 'sbi-sa',   name: 'State Bank of India', logo: 'assets/banks/SBI.png' },
+          { id: 'axis-sa',  name: 'Axis Bank',  logo: 'assets/banks/AXIS.png' },
+          { id: 'icici-sa', name: 'ICICI Bank', logo: 'assets/banks/ICICI.png' },
+          { id: 'idfc-sa',  name: 'IDFC FIRST Bank', svg: idfcSvg() },
+        ],
+      },
+      {
+        id: 'upi-wallets',
+        name: 'UPI Wallets',
+        desc: 'Import your UPI transaction history and statements',
+        bg: 'linear-gradient(135deg, #f1eafe 0%, #f6f1ff 100%)',
+        iconBg: '#ffffff',
+        iconColor: '#7c3aed',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><line x1="6.5" y1="6" x2="17.5" y2="6"/><circle cx="12" cy="18" r="0.9" fill="currentColor"/></svg>',
+        cols: 4,
+        providers: [
+          { id: 'gpay',     name: 'Google Pay', logo: 'assets/banks/GPAY.jpg' },
+          { id: 'phonepe',  name: 'PhonePe',    logo: 'assets/banks/phonepay.png' },
+          { id: 'paytm',    name: 'PayTM',      svg: paytmSvg() },
+          { id: 'bhim',     name: 'BHIM',       logo: 'assets/banks/Bhim.png' },
+        ],
+      },
+      {
+        id: 'mutual-funds',
+        name: 'Mutual Funds',
+        desc: 'Import statements from leading mutual fund providers',
+        bg: 'linear-gradient(135deg, #fef6e7 0%, #fdf9ef 100%)',
+        iconBg: '#ffffff',
+        iconColor: '#d97706',
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 12V3"/><path d="M12 12 19 7"/><path d="M12 12 19 17" opacity="0.55"/></svg>',
+        cols: 6,
+        // Same grid structure as the other rows — known partner gets
+        // the real logo; remaining slots are placeholders until we have
+        // the full mutual fund partner list.
+        providers: [
+          { id: 'mf-1', name: 'Mutual Fund Partner', logo: 'assets/banks/MF.jpg' },
+          { id: 'mf-2', ph: true },
+          { id: 'mf-3', ph: true },
+          { id: 'mf-4', ph: true },
+          { id: 'mf-5', ph: true },
+          { id: 'mf-6', ph: true },
+        ],
+      },
+    ];
+
+    /* Inline brand wordmarks for providers without an asset file. These
+       are the OFFICIAL brand marks (recreated inline so the tile scale
+       rules apply) — not abstract CSS text. */
+    function idfcSvg() {
+      return `
+        <svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg" aria-label="IDFC FIRST Bank">
+          <g fill="#a91e2c">
+            <rect x="6"  y="14" width="22" height="32" rx="1.2"/>
+            <rect x="32" y="14" width="6"  height="32"/>
+            <rect x="42" y="14" width="22" height="32" rx="1.2"/>
+            <rect x="68" y="14" width="6"  height="32"/>
+          </g>
+          <text x="0" y="58" font-family="Inter, sans-serif" font-weight="800" font-size="13" fill="#a91e2c" letter-spacing="0.5">IDFC FIRST</text>
+          <text x="69" y="58" font-family="Inter, sans-serif" font-weight="500" font-size="13" fill="#a91e2c" letter-spacing="0.5">Bank</text>
+        </svg>`;
+    }
+    function paytmSvg() {
+      return `
+        <svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg" aria-label="PayTM">
+          <text x="6" y="34" font-family="Inter, sans-serif" font-weight="800" font-size="22" fill="#00BAF2" letter-spacing="-0.5">Pay</text>
+          <text x="50" y="34" font-family="Inter, sans-serif" font-weight="800" font-size="22" fill="#0F1A6A" letter-spacing="-0.5">TM</text>
+          <rect x="6" y="42" width="60" height="3" fill="#00BAF2"/>
+        </svg>`;
+    }
+
+    /* -------- render -------- */
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+      })[c]);
+    }
+
+    function renderTile(p) {
+      let body;
+      if (p.ph) {
+        body = `
+          <div class="src-tile-img">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </div>`;
+      } else if (p.logo) {
+        body = `
+          <div class="src-tile-img">
+            <img src="${escapeHtml(p.logo)}" alt="${escapeHtml(p.name || '')}" loading="lazy" decoding="async">
+          </div>
+          <div class="src-tile-name">${escapeHtml(p.name)}</div>`;
+      } else if (p.svg) {
+        body = `
+          <div class="src-tile-svg">${p.svg}</div>
+          <div class="src-tile-name">${escapeHtml(p.name)}</div>`;
+      } else {
+        return '';
+      }
+
+      return `
+        <div class="src-tile${p.ph ? ' ph' : ''}" data-id="${escapeHtml(p.id)}">
+          ${body}
+        </div>`;
+    }
+
+    function renderCategory(c) {
+      const tiles = c.providers.map(renderTile).join('');
+      return `
+        <div class="src-row" data-cat="${escapeHtml(c.id)}">
+          <div class="src-cat" style="--cat-bg:${c.bg};--cat-icon-bg:${c.iconBg};--cat-icon-color:${c.iconColor};">
+            <div class="src-cat-icon">${c.icon}</div>
+            <div class="src-cat-text">
+              <div class="src-cat-name">${escapeHtml(c.name)}</div>
+              <div class="src-cat-desc">${escapeHtml(c.desc)}</div>
+            </div>
+          </div>
+          <div class="src-tiles" style="--cols:${c.cols};">
+            ${tiles}
+          </div>
+        </div>`;
+    }
+
+    function render() {
+      const grid = document.getElementById('sourcesGrid');
+      if (!grid) return;
+      grid.innerHTML = CATEGORIES.map(renderCategory).join('');
+    }
+
+    /* Re-render once the iframe is mounted so the layout sizes to its
+       actual box. */
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', render);
+    } else {
+      render();
+    }
+    /* Second pass after fonts/images are likely loaded — guards against
+       min-height mis-calculation when fonts swap. */
+    window.addEventListener('load', render);
+    /* Iframes sometimes resize after the host page finishes layout;
+       a light ResizeObserver re-renders so the rows stay tidy. */
+    window.addEventListener('resize', () => {
+      clearTimeout(window.__rT);
+      window.__rT = setTimeout(render, 80);
+    });
+  </script>
+</body>
+</html>

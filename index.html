@@ -148,160 +148,20 @@
     }
 
     /* ---------------------------------------------------------------------
-       Slide 3 — Logo scoreboard (4 → 4 → 2).
-       Four black tiles in a row, each holding a logo. Tiles flip up from
-       the bottom with a left-to-right stagger (rotateX, ~80 ms apart).
-       Phase dwell ~5 s; arrow buttons step phases manually.
-       Layout: 4 columns, 3 rows; the 10th logo spans cols 2-3 of row 3
-       so the 2-tile row stays centered under the 4-tile rows.
+       Slide 3 — Supported Statement Sources (4-row category panel).
+       The whole slide is rendered inside assets/slide3-sources.html and
+       mounted as an iframe so the rest of the page stays untouched. The
+       iframe fills the slide edge-to-edge; the inner page owns its own
+       typography, colour and layout.
     --------------------------------------------------------------------- */
-    .scoreboard {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 14px 18px;
-      box-sizing: border-box;
-      background: #ffffff;
-      perspective: 1400px;
-    }
-    .scoreboard-stage {
-      flex: 1;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .scoreboard-grid {
-      width: 100%;
-      max-width: 1080px;
-      display: grid;
-      gap: clamp(10px, 1.4vw, 18px);
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: auto auto auto;
-      align-items: stretch;
-    }
-    @media (max-width: 720px) {
-      .scoreboard-grid { gap: 10px; }
-    }
-
-    /* Tile: black card with the logo centred inside, taller than wide
-       (matches the reference "2023" tiles). */
-    .score-cell {
-      position: relative;
-      aspect-ratio: 4 / 5;
-      transform-style: preserve-3d;
-      transform-origin: 50% 100%;
-      /* Hidden by default — JS adds .is-in to play the entrance. */
-      opacity: 0;
-      transform: translateY(60%) rotateX(-90deg);
-      will-change: transform, opacity;
-    }
-    .score-cell:nth-child(9) { grid-column: 2; }
-    .score-cell:nth-child(10){ grid-column: 3; }
-    @media (max-width: 720px) {
-      .score-cell { aspect-ratio: 5 / 6; }
-    }
-
-    /* Entrance state. The keyframe is driven by --flip-delay, which JS
-       sets per cell so the left-to-right cascade has the right offset. */
-    .score-cell.is-in {
-      animation: score-in 0.85s cubic-bezier(.18,.95,.32,1.05) both;
-      animation-delay: var(--flip-delay, 0ms);
-    }
-    @keyframes score-in {
-      0%   { opacity: 0; transform: translateY(60%) rotateX(-90deg); }
-      55%  { opacity: 1; }
-      100% { opacity: 1; transform: translateY(0)    rotateX(0deg);   }
-    }
-
-    /* Exit state — tiles drop back down so the next phase can come in. */
-    .score-cell.is-out {
-      animation: score-out 0.45s cubic-bezier(.4,0,.7,.3) both;
-      animation-delay: var(--flip-delay, 0ms);
-    }
-    @keyframes score-out {
-      0%   { opacity: 1; transform: translateY(0)    rotateX(0deg);   }
-      100% { opacity: 0; transform: translateY(40%) rotateX(45deg);  }
-    }
-
-    .score-card {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: #0f172a;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 14% 16%;
-      box-sizing: border-box;
-      box-shadow: 0 10px 22px -10px rgba(15,23,42,0.55),
-                  0 2px 0 rgba(255,255,255,0.04) inset;
-    }
-    .score-card img {
-      max-width: 80%;
-      max-height: 80%;
-      object-fit: contain;
-      /* Most bank logos are dark on white. The tile is near-black, so
-       invert so the logos read correctly inside the tile. */
-      filter: invert(1) brightness(1.05);
-    }
-
-    /* Reduced motion: just fade in/out, no flip. */
-    @media (prefers-reduced-motion: reduce) {
-      .score-cell                { transition: opacity .3s ease; transform: none; }
-      .score-cell.is-in,
-      .score-cell.is-out          { animation: none; opacity: 1; transform: none; }
-    }
-
-    /* Arrows: circle buttons inside the scoreboard, same look as before. */
-    .score-arrow {
+    .sources-iframe {
       position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 36px;
-      height: 36px;
-      border-radius: 9999px;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
       background: #ffffff;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 2px 8px rgba(15,23,42,0.10);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: #0f172a;
-      transition: background .15s ease, transform .15s ease;
-      z-index: 2;
-    }
-    .score-arrow:hover  { background: #f8fafc; }
-    .score-arrow:active { transform: translateY(-50%) scale(0.96); }
-    .score-arrow.prev   { left: 8px; }
-    .score-arrow.next   { right: 8px; }
-    .score-arrow svg    { width: 16px; height: 16px; }
-
-    /* Dots: 3 phase indicators under the tiles. */
-    .score-dots {
-      position: absolute;
-      bottom: 10px;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: center;
-      gap: 6px;
-    }
-    .score-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 9999px;
-      background: #cbd5e1;
-      transition: background .2s ease, transform .2s ease;
-    }
-    .score-dot.active {
-      background: #0f172a;
-      transform: scale(1.25);
+      display: block;
     }
 
     /* Slide 1 — Moneylizer logo animation.
@@ -333,7 +193,7 @@
       animation:
         m360-enter 0.9s cubic-bezier(.22,1,.36,1) 0.15s forwards,
         m360-breathe 4.2s ease-in-out 1.1s infinite;
-      filter: drop-shadow(0 18px 38px rgba(15,23,42,0.55))
+      filter: drop-shadow(0 18px 38px rgba(22, 34, 70, 0.55))
               drop-shadow(0 2px 0 rgba(255,255,255,0.04));
     }
     @keyframes m360-enter {
@@ -501,20 +361,29 @@
         display: none !important;
       }
 
-      /* Slide 3 — scoreboard flip: fill the slide edge-to-edge, slightly
-         tighter padding on phones so 4+4+2 fits on small screens. */
+      /* Slide 3 — supported sources iframe: fills the slide edge-to-edge.
+         The inner page (slide3-sources.html) handles its own padding for
+         small screens via its own @media queries. */
       .hero-slide[data-slide="2"] {
         background: #FFFFFF !important;
       }
-      .hero-slide[data-slide="2"] .scoreboard {
+      .hero-slide[data-slide="2"] > div.absolute.inset-0 {
         position: absolute !important;
         inset: 0 !important;
         width: 100% !important;
         height: 100% !important;
-        padding: 12px 14px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
       }
-      .hero-slide[data-slide="2"] .scoreboard-grid {
-        gap: 8px !important;
+      .hero-slide[data-slide="2"] #sourcesFrame {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        border: 0 !important;
+        display: block !important;
       }
 
       /* Slide 4 — 3D Financial Cube (iframe): fill the slide edge-to-edge,
@@ -598,7 +467,7 @@
           <!-- Slide 2: Product Demo (video) -->
           <div class="hero-slide absolute inset-0" data-slide="1" data-duration="video">
             <video id="demoVideo" class="w-full h-full object-cover" muted playsinline preload="auto"
-              src="assets/Demo2.mp4"></video>
+              src="assets/Demo (3).mp4"></video>
             <div class="absolute inset-0"
               style="background: linear-gradient(to top, rgba(7,18,36,0.4) 0%, transparent 55%);"></div>
             <button id="playToggle"
@@ -615,27 +484,24 @@
            
           </div>
 
-          <!-- Slide 3: Scoreboard flip animation.
-               10 logos laid out as 4 + 4 + 2. Each row of 4 flips in a
-               90 ms-cascaded stagger; every 5 s the cycle advances to the
-               next phase. Arrow buttons let the user step through manually
-               (and reset the auto timer). The 3 dot indicators at the
-               bottom show which phase is currently displayed. -->
-          <div class="hero-slide absolute inset-0" data-slide="2" data-duration="15500" style="background:#ffffff;">
-            <div class="scoreboard" id="scoreboard">
-              <button class="score-arrow prev" id="scorePrev" aria-label="Previous phase" type="button">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-              </button>
-
-              <div class="scoreboard-stage">
-                <div class="scoreboard-grid" id="scoreGrid"></div>
-              </div>
-
-              <button class="score-arrow next" id="scoreNext" aria-label="Next phase" type="button">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-              </button>
-
-              <div class="score-dots" id="scoreDots"></div>
+          <!-- Slide 3: Supported Statement Sources.
+               4 full-width rows (Credit Cards / Savings A/C / UPI Wallets /
+               Mutual Funds). Each row has a tinted left category panel and
+               a responsive right-side logo grid. Renders inside
+               assets/slide3-sources.html so the rest of the page stays
+               untouched. Mounted as an iframe — data-src only, so the
+               bundle is fetched lazily on first visit and warmed up via
+               <link rel=prefetch> after window.load. -->
+          <div class="hero-slide absolute inset-0" data-slide="2" data-duration="9000" style="background:#ffffff;">
+            <div class="absolute inset-0">
+              <iframe
+                id="sourcesFrame"
+                data-src="assets/slide3-sources.html"
+                title="Supported Statement Sources"
+                loading="lazy"
+                class="sources-iframe"
+                allow="autoplay"
+              ></iframe>
             </div>
           </div>
 
@@ -699,230 +565,11 @@
       const CUBE_DWELL_MS = 12000; // ms — Slide 4 (cube is the whole show)
       const VIDEO_DWELL = 'video'; // sentinel for slide 2
 
-      // ---- Slide 3: Scoreboard flip animation (4 → 4 → 2 logos).
-      // Each phase shows up to 4 cards. Phase A: logos 1-4,
-      // phase B: logos 5-8, phase C: logos 9-10 (only 2 in this row).
-      // ---- Slide 3: Logo scoreboard (4 → 4 → 2 logos).
-      // 10 black tiles (one logo each) arranged in 3 rows of 4-4-2.
-      // Each phase plays a "flip-up from the bottom" entrance on its
-      // 4 (or 2) tiles, left-to-right with a small per-cell delay. Tiles
-      // hold for PHASE_DWELL_MS, then drop down before the next phase
-      // flips up. Auto-advances every 5 s; arrow buttons / dot indicators
-      // step phases manually and reset the auto timer. ----
-      const SCORE_LOGOS = [
-        { name: 'State Bank of India', logo: 'assets/banks/SBI.png' },
-        { name: 'HDFC Bank',           logo: 'assets/banks/HDFC.jpg' },
-        { name: 'Axis Bank',           logo: 'assets/banks/AXIS.png' },
-        { name: 'ICICI Bank',          logo: 'assets/banks/ICICI.png' },
-        { name: 'Google Pay',          logo: 'assets/banks/GPAY.jpg' },
-        { name: 'PhonePe',             logo: 'assets/banks/phonepay.png' },
-        { name: 'Samsung Wallet',      logo: 'assets/banks/Samati.png' },
-        { name: 'Mutual Funds',        logo: 'assets/banks/MF.jpg' },
-        { name: 'IndusInd Bank',       logo: 'assets/banks/Induslnd.png' },
-        { name: 'BHIM UPI',            logo: 'assets/banks/Bhim.png' },
-      ];
-
-      const PHASES = [4, 4, 2];                 // tile counts per phase
-      const PHASE_DWELL_MS    = 5000;           // hold before flipping to next phase
-      const CARD_IN_STAGGER   = 90;             // delay between tiles within a row
-      const CARD_OUT_STAGGER  = 50;             // faster cascade when tiles drop
-      const CARD_IN_DURATION  = 850;            // matches CSS keyframe duration
-      const CARD_OUT_DURATION = 450;            // matches CSS keyframe duration
-
-      const scoreGrid = document.getElementById('scoreGrid');
-      const scoreDots = document.getElementById('scoreDots');
-      const scorePrev = document.getElementById('scorePrev');
-      const scoreNext = document.getElementById('scoreNext');
-
-      let scorePhase        = 0;
-      let scoreTimer        = null;
-      let scoreTimeout      = null;             // one-shot delay between exit and entrance
-      let scoreCardsBuilt   = false;
-      let scoreEntering     = false;           // debounce so two advances can't overlap
-
-      function buildScoreCards() {
-        if (!scoreGrid || scoreCardsBuilt) return;
-        scoreGrid.innerHTML = SCORE_LOGOS.map((l, i) => `
-          <div class="score-cell" data-idx="${i}" aria-hidden="true">
-            <div class="score-card">
-              <img src="${l.logo}" alt="${l.name}" loading="lazy" decoding="async">
-            </div>
-          </div>
-        `).join('');
-        scoreCardsBuilt = true;
-      }
-
-      function buildScoreDots() {
-        if (!scoreDots) return;
-        scoreDots.innerHTML = PHASES.map((_, i) =>
-          `<span class="score-dot${i === scorePhase ? ' active' : ''}" data-phase="${i}"></span>`
-        ).join('');
-        scoreDots.querySelectorAll('.score-dot').forEach(dot => {
-          dot.addEventListener('click', () => {
-            const target = parseInt(dot.dataset.phase, 10);
-            if (target !== scorePhase) jumpToScore(target);
-          });
-        });
-      }
-
-      // Visible cards in a phase: phase A = [0..3], B = [4..7], C = [8..9].
-      function visibleCardIndices(phase) {
-        const start = PHASES.slice(0, phase).reduce((s, n) => s + n, 0);
-        const count = PHASES[phase];
-        return Array.from({ length: count }, (_, i) => start + i);
-      }
-
-      function setDots(phase) {
-        if (!scoreDots) return;
-        scoreDots.querySelectorAll('.score-dot').forEach((dot, i) => {
-          dot.classList.toggle('active', i === phase);
-        });
-      }
-
-      function setArrowDisabled(phase) {
-        if (scorePrev) scorePrev.disabled = (phase === 0);
-        if (scoreNext) scoreNext.disabled = (phase === PHASES.length - 1);
-      }
-
-      // Play the "drop down + fade out" animation on cells that belong to
-      // the previous phase, and the "flip up from bottom" entrance on
-      // cells that belong to the new phase. Per-cell --flip-delay drives
-      // the cascade.
-      function transitionTo(newPhase) {
-        if (!scoreGrid) return;
-        scoreEntering = true;
-        const newVisible = new Set(visibleCardIndices(newPhase));
-
-        scoreGrid.querySelectorAll('.score-cell').forEach(cell => {
-          const idx = parseInt(cell.dataset.idx, 10);
-          const wasVisible = !cell.classList.contains('is-idle') && !cell.classList.contains('is-out');
-
-          // Cells leaving: play the exit animation.
-          if (wasVisible && !newVisible.has(idx)) {
-            const exitOrder = [...cell.parentElement.querySelectorAll('.score-cell')]
-              .filter(c => !c.classList.contains('is-out') && !c.classList.contains('is-idle'))
-              .indexOf(cell);
-            cell.style.setProperty('--flip-delay', (exitOrder * CARD_OUT_STAGGER) + 'ms');
-            cell.classList.remove('is-in');
-            cell.classList.add('is-out');
-            // After the exit animation finishes, hide it.
-            setTimeout(() => {
-              cell.classList.add('is-idle');
-              cell.style.display = 'none';
-            }, CARD_OUT_DURATION + exitOrder * CARD_OUT_STAGGER + 50);
-            return;
-          }
-
-          // Cells staying: no-op.
-          if (wasVisible && newVisible.has(idx)) return;
-
-          // Cells entering: position them in the layout, set stagger, play in.
-          if (!wasVisible && newVisible.has(idx)) {
-            cell.style.display = '';
-            cell.classList.remove('is-idle', 'is-out');
-            const enterOrder = [...newVisible].indexOf(idx);
-            cell.style.setProperty('--flip-delay', (enterOrder * CARD_IN_STAGGER) + 'ms');
-            // Force reflow so the entrance animation re-triggers cleanly.
-            void cell.offsetWidth;
-            cell.classList.add('is-in');
-          }
-        });
-
-        setDots(newPhase);
-        setArrowDisabled(newPhase);
-
-        // Unlock advanceScore once the entrance settles (longest stagger + duration).
-        const maxStagger = (Math.max(...newVisible) - Math.min(...newVisible)) * CARD_IN_STAGGER;
-        if (scoreTimeout) clearTimeout(scoreTimeout);
-        scoreTimeout = setTimeout(() => {
-          scoreEntering = false;
-          scheduleNextAdvance();
-        }, CARD_IN_DURATION + maxStagger + 50);
-      }
-
-      // Auto-tick callback: advance to next phase and schedule the next tick.
-      function scheduleNextAdvance() {
-        if (scoreTimer) { clearTimeout(scoreTimer); scoreTimer = null; }
-        scoreTimer = setTimeout(advanceScore, PHASE_DWELL_MS);
-      }
-      function advanceScore() {
-        if (scoreEntering) return;
-        const next = (scorePhase + 1) % PHASES.length;
-        scorePhase = next;
-        transitionTo(next);
-      }
-
-      // Manual navigation (arrow / dot): jump to the given phase and restart
-      // the dwell timer. Cancels any in-flight transition.
-      function jumpToScore(phase) {
-        if (scoreEntering) {
-          // Force-finish the current entrance immediately by skipping its unlock.
-          scoreEntering = false;
-          if (scoreTimeout) { clearTimeout(scoreTimeout); scoreTimeout = null; }
-        }
-        scorePhase = phase;
-        if (scoreTimer) { clearTimeout(scoreTimer); scoreTimer = null; }
-        transitionTo(phase);
-      }
-
-      function startScoreCycle() {
-        stopScoreCycle();
-        if (!scoreCardsBuilt) buildScoreCards();
-        if (!scoreDots || !scoreDots.children.length) buildScoreDots();
-        // Reset every tile to idle.
-        if (scoreGrid) {
-          scoreGrid.querySelectorAll('.score-cell').forEach(cell => {
-            cell.classList.remove('is-in', 'is-out');
-            cell.classList.add('is-idle');
-            cell.style.display = 'none';
-          });
-        }
-        scorePhase = 0;
-        // First phase entrance — no exit to play.
-        scoreEntering = true;
-        const firstVisible = visibleCardIndices(0);
-        if (scoreGrid) {
-          scoreGrid.querySelectorAll('.score-cell').forEach(cell => {
-            const idx = parseInt(cell.dataset.idx, 10);
-            if (firstVisible.includes(idx)) {
-              cell.style.display = '';
-              cell.classList.remove('is-idle');
-              cell.style.setProperty('--flip-delay', (firstVisible.indexOf(idx) * CARD_IN_STAGGER) + 'ms');
-              void cell.offsetWidth;
-              cell.classList.add('is-in');
-            }
-          });
-        }
-        setDots(0);
-        setArrowDisabled(0);
-        // After the entrance plays, schedule the auto-advance.
-        if (scoreTimeout) clearTimeout(scoreTimeout);
-        scoreTimeout = setTimeout(() => {
-          scoreEntering = false;
-          scheduleNextAdvance();
-        }, CARD_IN_DURATION + (firstVisible.length - 1) * CARD_IN_STAGGER + 50);
-      }
-
-      function stopScoreCycle() {
-        if (scoreTimer)   { clearTimeout(scoreTimer);   scoreTimer   = null; }
-        if (scoreTimeout) { clearTimeout(scoreTimeout); scoreTimeout = null; }
-        scoreEntering = false;
-        // Reset all tiles to idle so the next startScoreCycle is clean.
-        if (scoreGrid) {
-          scoreGrid.querySelectorAll('.score-cell').forEach(cell => {
-            cell.classList.remove('is-in', 'is-out');
-            cell.classList.add('is-idle');
-            cell.style.display = 'none';
-          });
-        }
-      }
-
-      scorePrev && scorePrev.addEventListener('click', () => {
-        if (scorePhase > 0) jumpToScore(scorePhase - 1);
-      });
-      scoreNext && scoreNext.addEventListener('click', () => {
-        if (scorePhase < PHASES.length - 1) jumpToScore(scorePhase + 1);
-      });
+      // ---- Slide 3: Supported Statement Sources (lazy iframe).
+      // The 4-row category panel is its own page (assets/slide3-sources.html),
+      // so we only mount the iframe on first visit and never reload it —
+      // the inner page has no entry animation, just a static grid + hover.
+      const SOURCES_URL = 'assets/slide3-sources.html';
 
       let active = 0;
       let timer = null;
@@ -937,7 +584,7 @@
         if (!slideEl) return DEFAULT_DWELL;
         if (slideEl.dataset.duration === VIDEO_DWELL) return VIDEO_DWELL;
         // Numeric data-duration overrides DEFAULT_DWELL — used by slide 3
-        // (scoreboard) so all 3 phases have time to play.
+        // (sources) so it has time to read the 4 rows.
         const override = parseInt(slideEl.dataset.duration, 10);
         if (!isNaN(override) && override !== DEFAULT_DWELL) return override;
         return DEFAULT_DWELL;
@@ -996,13 +643,9 @@
           startLogoIframe();
         }
 
-        // Slide 3: scoreboard flip (4-4-2). Auto-rotate on entry, stop
-        // when leaving so the per-phase timer doesn't burn cycles in
-        // the background.
+        // Slide 3: mount the supported-sources iframe on first visit.
         if (active === 2) {
-          startScoreCycle();
-        } else {
-          stopScoreCycle();
+          startSourcesIframe();
         }
 
         // Slide 4: the 3D cube runs inside an iframe. Re-load it whenever
@@ -1041,22 +684,18 @@
       // The iframe has data-src but no src, so the browser does NOT fetch
       // assets/financial-cube.html on page load — first paint stays light.
       // startCubeIframe() copies data-src into src on the FIRST visit to
-      // slide 4, then cache-busts on every subsequent visit so the cube's
-      // entrance animation replays. After window.load fires, we also drop
-      // in a <link rel=prefetch> so the cube downloads in the idle window
-      // before the carousel naturally reaches slide 4 — by the time slide
-      // 4 is shown, the bundle is already in the HTTP cache. ----
+      // slide 4 and NEVER re-loads. The 1.17 MB Three.js bundle is heavy
+      // to re-download on every carousel loop, and the entrance animation
+      // doesn't carry the slide — the auto-rotate inside the cube is the
+      // "alive" signal. After window.load fires we also drop in a
+      // <link rel=prefetch> so the cube downloads in the idle window before
+      // the carousel naturally reaches slide 4. ----
       const cubeFrame  = document.getElementById('cubeFrame');
       const CUBE_URL   = 'assets/financial-cube.html';
-      let cubeMounted  = false;
 
       function startCubeIframe() {
-        if (!cubeFrame) return;
-        // Cache-bust on every entry — guarantees a clean Three.js /
-        // R3F internal state and replays the entrance animation.
-        const url = CUBE_URL + (cubeMounted ? '?t=' + Date.now() : '');
-        cubeFrame.src = url;
-        cubeMounted = true;
+        if (!cubeFrame || cubeFrame.src) return;
+        cubeFrame.src = CUBE_URL;
       }
 
       // ---- shared prefetch helper.
@@ -1080,15 +719,18 @@
       // ---- slide 1: Moneylizer logo animation (LAZY iframe). ----
       const logoFrame  = document.getElementById('logoFrame');
       const LOGO_URL   = 'assets/logo-animation.html';
-      let logoMounted  = false;
 
       function startLogoIframe() {
-        if (!logoFrame) return;
-        // First visit: copy data-src into src. Later visits: cache-bust so
-        // the letter-by-letter animation replays from the start.
-        const url = LOGO_URL + (logoMounted ? '?t=' + Date.now() : '');
-        logoFrame.src = url;
-        logoMounted = true;
+        if (!logoFrame || logoFrame.src) return;
+        logoFrame.src = LOGO_URL;
+      }
+
+      // ---- slide 3: Supported Statement Sources (LAZY iframe). ----
+      const sourcesFrame = document.getElementById('sourcesFrame');
+
+      function startSourcesIframe() {
+        if (!sourcesFrame || sourcesFrame.src) return;
+        sourcesFrame.src = SOURCES_URL;
       }
 
       // ---- init ----
@@ -1098,7 +740,7 @@
       // we speculatively prefetch the two bundles so they're cached before
       // the carousel naturally reaches slide 4 (cube) and on every
       // subsequent loop back to slide 1 (logo).
-      function warmup() { prefetch(LOGO_URL); prefetch(CUBE_URL); }
+      function warmup() { prefetch(LOGO_URL); prefetch(SOURCES_URL); prefetch(CUBE_URL); }
       if (document.readyState === 'complete') warmup();
       else window.addEventListener('load', warmup, { once: true });
     })();

@@ -51,9 +51,13 @@
   }
   @keyframes letterIn{ to{ opacity:1; transform:translateY(0) rotate(0); } }
 
-  .tagline{
+  .tagline-line1{
     opacity:0; transform:translateY(12px);
     animation: letterIn .8s 2.5s forwards;
+  }
+  .tagline-line2{
+    opacity:0; transform:translateY(12px);
+    animation: letterIn .8s 2.65s forwards;
   }
 
   /* ---------- Shine sweep ---------- */
@@ -71,12 +75,12 @@
 
   .glow{ filter: drop-shadow(0 12px 30px rgba(27,47,110,.35)); }
   .grid-bg{
-    background-image:radial-gradient(circle at 1px 1px, rgba(27,47,110,.13) 1px, transparent 0);
+    background-image:radial-gradient(circle at 1px 1px, rgba(27,47,110,.16) 1px, transparent 0);
     background-size:26px 26px;
   }
 </style>
 </head>
-<body class="min-h-screen grid-bg bg-slate-50 flex flex-col items-center justify-center p-6 overflow-x-hidden">
+<body class="min-h-screen grid-bg bg-white flex flex-col items-center justify-center p-6 overflow-x-hidden">
 
   <div id="stage" class="stage flex flex-col md:flex-row items-center gap-6 md:gap-12 select-none">
 
@@ -105,11 +109,13 @@
       <path class="shield-fill" d="M100 8 L188 42 C188 140 156 200 100 232 C44 200 12 140 12 42 Z" fill="url(#navyGrad)"/>
       <path class="shield-fill" d="M100 34 L166 60 C166 136 141 182 100 208 C59 182 34 136 34 60 Z" fill="#ffffff"/>
 
-      <!-- bars are clipped to the shield interior so Option B keeps them inside the mark -->
+      <!-- bars are clipped to the shield interior, then scaled down + centered so they never touch the shield walls -->
       <g clip-path="url(#shieldInteriorClip)">
-        <rect class="bar b1" x="53"  y="112" width="26" height="66"  rx="12" fill="url(#bar1)"/>
-        <rect class="bar b2" x="87"  y="78"  width="26" height="100" rx="12" fill="url(#bar2)"/>
-        <rect class="bar b3" x="121" y="58"  width="26" height="120" rx="12" fill="url(#bar3)"/>
+        <g transform="translate(100,121) scale(0.62) translate(-100,-121)">
+          <rect class="bar b1" x="53"  y="112" width="26" height="66"  rx="12" fill="url(#bar1)"/>
+          <rect class="bar b2" x="87"  y="78"  width="26" height="100" rx="12" fill="url(#bar2)"/>
+          <rect class="bar b3" x="121" y="58"  width="26" height="120" rx="12" fill="url(#bar3)"/>
+        </g>
       </g>
 
       <!-- outlines draw above the bars to keep the bars visually inside the shield -->
@@ -121,8 +127,9 @@
 
     <!-- WORDMARK -->
     <div class="text-center md:text-left">
-      <h1 id="word" class="wordmark text-5xl md:text-7xl font-extrabold tracking-tight text-[#1b2f6e]"></h1>
-      <p class="tagline mt-2 text-base md:text-2xl font-medium text-slate-800">Understand your money. Securely.</p>
+      <h1 id="word" class="wordmark text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight text-[#1b2f6e]"></h1>
+      <p class="tagline-line1 mt-2 text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight text-slate-800">Understand your money.</p>
+      <p class="tagline-line2 mt-1 text-base md:text-2xl font-medium text-slate-800">Securely.</p>
     </div>
   </div>
 
