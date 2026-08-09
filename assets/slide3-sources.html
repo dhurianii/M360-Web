@@ -66,13 +66,15 @@
       letter-spacing: -0.005em;
     }
 
-    /* The 4 category rows: edge-to-edge grid of full-width cards. */
+    /* The 4 category rows: edge-to-edge grid of full-width cards.
+       `min-height: 0` on every layer (grid → row → tile → img) is what
+       lets the 1fr rows actually shrink to fit at desktop heights. */
     .sources-grid {
       flex: 1;
       min-height: 0;
       display: grid;
-      grid-template-rows: repeat(4, 1fr);
-      gap: clamp(8px, 1.1vh, 14px);
+      grid-template-rows: repeat(4, minmax(0, 1fr));
+      gap: clamp(6px, 0.9vh, 12px);
     }
 
     /* Single row: a unified white card with a tinted left panel + a
@@ -80,10 +82,10 @@
     .src-row {
       position: relative;
       display: grid;
-      grid-template-columns: 280px 1fr;
+      grid-template-columns: 240px 1fr;
       background: #ffffff;
       border: 1px solid #e7ecf3;
-      border-radius: 14px;
+      border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
       min-height: 0;
@@ -91,21 +93,23 @@
 
     /* Category panel (left side) — keeps category colour, icon, name and
        a short description. Distinct background so it reads as a separate
-       module from the logo grid. */
+       module from the logo grid. Sizing is tight enough that 4 rows fit
+       in the hero stage at 1440×900 (≈150px per row). */
     .src-cat {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding: 14px 18px;
+      gap: 12px;
+      padding: 10px 14px;
       border-right: 1px solid #eef1f6;
       background: var(--cat-bg, #f8fafc);
       transition: background .2s ease;
+      min-height: 0;
     }
     .src-cat-icon {
       flex-shrink: 0;
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
       background: var(--cat-icon-bg, #ffffff);
       display: flex;
       align-items: center;
@@ -113,23 +117,23 @@
       box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
     }
     .src-cat-icon svg {
-      width: 26px;
-      height: 26px;
+      width: 22px;
+      height: 22px;
       color: var(--cat-icon-color, #2563eb);
     }
     .src-cat-text { min-width: 0; }
     .src-cat-name {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       color: #0f172a;
       letter-spacing: -0.01em;
       line-height: 1.2;
     }
     .src-cat-desc {
-      margin-top: 4px;
-      font-size: 11.5px;
+      margin-top: 3px;
+      font-size: 10.5px;
       color: #64748b;
-      line-height: 1.4;
+      line-height: 1.35;
       font-weight: 500;
     }
 
@@ -138,27 +142,30 @@
     .src-tiles {
       display: grid;
       grid-template-columns: repeat(var(--cols, 6), minmax(0, 1fr));
-      gap: 10px;
-      padding: 12px 14px;
+      gap: 8px;
+      padding: 10px 12px;
       min-width: 0;
+      min-height: 0;
     }
 
     .src-tile {
       position: relative;
       background: #ffffff;
       border: 1px solid #e7ecf3;
-      border-radius: 12px;
+      border-radius: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 10px 8px;
-      gap: 6px;
+      padding: 8px 6px;
+      gap: 5px;
       cursor: default;
       transition: transform .18s cubic-bezier(.22,1,.36,1),
                   box-shadow .18s ease,
                   border-color .18s ease;
       min-height: 0;
+      min-width: 0;
+      overflow: hidden;
     }
     .src-tile:hover {
       transform: translateY(-2px) scale(1.012);
@@ -167,11 +174,15 @@
                   0 2px 4px rgba(15, 23, 42, 0.04);
     }
 
-    /* Image tile (real logos). Centered, contained, never stretched. */
+    /* Image tile (real logos). Centered, contained, never stretched.
+       The img wrapper has an absolute max-height cap so the logo can
+       never push the row taller than the 1fr allocation — this is
+       what keeps all 4 rows visible at desktop viewports. */
     .src-tile-img {
       width: 100%;
       flex: 1;
       min-height: 0;
+      max-height: 84px;
       display: flex;
       align-items: center;
       justify-content: center;
