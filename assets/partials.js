@@ -12,6 +12,7 @@
     'faqs.html': 'faqs',
     'privacy.html': 'privacy',
     'terms.html': 'terms',
+    'data-policy.html': 'data-policy',
     'index.html': 'home',
     '': 'home'
   };
@@ -57,6 +58,8 @@
       <a href="privacy.html" class="footer-link">Privacy Policy</a>
       <span class="text-slate-300">&bull;</span>
       <a href="terms.html" class="footer-link">T&amp;C</a>
+      <span class="text-slate-300">&bull;</span>
+      <a href="data-policy.html" class="footer-link">Data Policy</a>
     </div>
   </div>
 </footer>`;
@@ -66,7 +69,7 @@
   if (headerSlot) {
     headerSlot.outerHTML = HEADER_HTML;
     // Apply active state for the current page
-    if (currentPage !== 'home' && currentPage !== 'privacy' && currentPage !== 'terms') {
+    if (currentPage !== 'home' && currentPage !== 'privacy' && currentPage !== 'terms' && currentPage !== 'data-policy') {
       const link = document.querySelector(`#primaryNav [data-page="${currentPage}"]`);
       if (link) link.classList.add('active');
       const mobileLink = document.querySelector(`#mobileNavMenu [data-page="${currentPage}"]`);
