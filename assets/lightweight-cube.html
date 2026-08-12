@@ -82,25 +82,40 @@
   }
   #cube.dragging { cursor: grabbing; }
 
-  /* ─── Faces ────────────────────────────────────────────────────── */
+  /* ─── Faces ──────────────────────────────────────────────────────
+     FLAT/SHARP CORNERS: border-radius removed.
+     Counter-rotation on .face-inner keeps text upright on
+     top/bottom/left/right faces. The face containers are still
+     rotated by the 3D transform, but the inner content is
+     transformed back so it remains readable. */
   .face {
     position: absolute;
     width:  var(--size);
     height: var(--size);
     background: var(--face-bg);
     border: 1.5px solid var(--face-border);
-    border-radius: 18px;
+    border-radius: 0;                 /* SHARP CORNERS — was 18px */
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
     backface-visibility: hidden;
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.9),
       0 4px 12px rgba(48, 43, 34, 0.12),
       0 20px 48px rgba(48, 43, 34, 0.14);
+  }
+
+  /* Inner wrapper — un-rotates the face so text reads upright.
+     Each face's .face-inner has its transform set dynamically by JS
+     so that the content always faces the viewer (no upside-down
+     or mirrored text) regardless of cube rotation. */
+  .face-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    transform-style: preserve-3d;
   }
 
   .face-label {
@@ -112,13 +127,27 @@
     font-weight: 600;
   }
 
-  /* face transforms */
+  /* face transforms — OUTER face still gets the cube-rotation,
+     but the inner wrapper applies a counter-rotation so the
+     content reads right-side-up. The face stays a "front" of
+     the cube (no mirror / upside-down) at any auto-spin angle. */
   .face-front  { transform: translateZ(calc(var(--size)/2)); }
   .face-back   { transform: rotateY(180deg) translateZ(calc(var(--size)/2)); }
   .face-right  { transform: rotateY(90deg)  translateZ(calc(var(--size)/2)); }
   .face-left   { transform: rotateY(-90deg) translateZ(calc(var(--size)/2)); }
   .face-top    { transform: rotateX(90deg)  translateZ(calc(var(--size)/2)); }
   .face-bottom { transform: rotateX(-90deg) translateZ(calc(var(--size)/2)); }
+
+  /* counter-rotation for each face's content is set dynamically
+     by JS each frame so the text is always upright (no upside-
+     down / mirrored text) regardless of the cube's rotation.
+     The .face-front-inner etc. classes are no-ops here. */
+  .face-front-inner,
+  .face-back-inner,
+  .face-right-inner,
+  .face-left-inner,
+  .face-top-inner,
+  .face-bottom-inner { /* dynamic transform set by JS */ }
 
   /* ─── Hint ─────────────────────────────────────────────────────── */
   #hint {
@@ -129,29 +158,6 @@
     pointer-events: none;
     white-space: nowrap;
   }
-
-  #zoom-controls {
-    position: fixed;
-    right: 24px;
-    bottom: 24px;
-    display: flex;
-    gap: 8px;
-    z-index: 20;
-  }
-  #zoom-controls button {
-    width: 38px;
-    height: 38px;
-    border: 1px solid var(--face-border);
-    border-radius: 50%;
-    background: var(--face-bg);
-    color: var(--text);
-    font: 500 20px/1 system-ui, sans-serif;
-    cursor: pointer;
-    box-shadow: 0 5px 16px rgba(48, 43, 34, 0.1);
-    transition: transform 160ms ease, background 160ms ease;
-  }
-  #zoom-controls button:hover { background: #ece9e1; transform: translateY(-2px); }
-  #zoom-controls button:active { transform: scale(0.94); }
 
   /* ══════════════════════════════════════════════════════════════════
      GRAPH STYLES
@@ -179,12 +185,11 @@
     50%      { transform: translate3d(0, -3px, 0) scale(1.012); }
   }
 
-  /* ─── FACE 1 – SANKEY – faithful to reference image ──────────── */
+  /* ─── FACE 1 – SANKEY – consistent annual financial story ─────── */
   #sankey-face .sankey-img-wrap {
     width: 100%; flex: 1;
     position: relative;
-    border-radius: 10px;
-    overflow: hidden;
+    overflow: hidden;             /* sharp corners */
     display: flex; align-items: center; justify-content: center;
     background:
       radial-gradient(120% 90% at 15% 20%, #efebff 0%, transparent 42%),
@@ -193,7 +198,6 @@
   }
   #sankey-face .sankey-img-wrap img {
     width: 100%; height: 100%; object-fit: cover;
-    border-radius: 10px;
   }
   /* shimmer pulse on the sankey image */
   #sankey-face .sankey-shimmer {
@@ -206,7 +210,6 @@
     );
     background-size: 200% 100%;
     animation: shimmer 3.5s ease-in-out infinite;
-    border-radius: 10px;
     pointer-events: none;
   }
   @keyframes shimmer {
@@ -269,7 +272,6 @@
   @media (max-width: 400px) {
     :root { --size: 240px; }
     #hint { bottom: 78px; }
-    #zoom-controls { right: 50%; transform: translateX(50%); }
   }
   @media (min-width: 401px) and (max-width: 600px) {
     :root { --size: 280px; }
@@ -290,183 +292,182 @@
   <div id="float-wrap">
     <div id="cube">
 
-      <!-- FACE 1 – FRONT – SANKEY (MATCHES REFERENCE IMAGE) -->
+      <!-- FACE 1 – FRONT – SANKEY (ANNUAL CASH FLOW, FY 2025-26) -->
       <div class="face face-front" id="sankey-face">
-        <div class="face-label">This is how money flows !</div>
-        <div class="sankey-img-wrap" id="sankey-wrap">
-          <svg id="sankey-svg" viewBox="0 0 354 262" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Salary and other income flowing to balance and expenses">
-            <defs>
-              <!-- subtle soft shadow for cards -->
-              <filter id="cardShadow" x="-12%" y="-20%" width="124%" height="144%">
-                <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#2f2b38" flood-opacity="0.08"/>
-              </filter>
-              <!-- center outer glow -->
-              <radialGradient id="centerGlow" cx="50%" cy="50%" r="60%">
-                <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
-                <stop offset="100%" stop-color="#ece9ff" stop-opacity="0.9"/>
-              </radialGradient>
-            </defs>
+        <div class="face-inner face-front-inner">
+          <div class="face-label">This is how money flows !</div>
+          <div class="sankey-img-wrap" id="sankey-wrap">
+            <svg id="sankey-svg" viewBox="0 0 354 262" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Annual income flowing to balance and expenses for FY 2025-26">
+              <defs>
+                <filter id="cardShadow" x="-12%" y="-20%" width="124%" height="144%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#2f2b38" flood-opacity="0.08"/>
+                </filter>
+                <radialGradient id="centerGlow" cx="50%" cy="50%" r="60%">
+                  <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+                  <stop offset="100%" stop-color="#ece9ff" stop-opacity="0.9"/>
+                </radialGradient>
+              </defs>
 
-            <!-- ===== FLOWS (behind nodes) ===== -->
-            <!-- Salary thick - purple -->
-            <path id="f-salary" d="M96,67 C120,67 118,86 135,110" fill="none" stroke="#9A90FF" stroke-width="22" stroke-linecap="round" opacity="0.95"/>
-            <!-- Other Income thin - teal -->
-            <path id="f-other-in" d="M96,169 C120,169 122,152 133,142" fill="none" stroke="#7BCFC0" stroke-width="2.4" stroke-linecap="round" opacity="0.95"/>
+              <!-- ===== FLOWS (behind nodes) =====
+                   Annual story: ₹18.47L in, ₹21.07L out, ₹12L drawn from prior savings
+                   → ₹8.4L debt carried (consistent across the cube) -->
+              <path id="f-salary" d="M96,67 C120,67 118,86 135,110" fill="none" stroke="#9A90FF" stroke-width="22" stroke-linecap="round" opacity="0.95"/>
+              <path id="f-other-in" d="M96,169 C120,169 122,152 133,142" fill="none" stroke="#7BCFC0" stroke-width="2.4" stroke-linecap="round" opacity="0.95"/>
 
-            <!-- Outflows to right (thin coral) -->
-            <path id="f-food" d="M189,95 C210,95 232,62 258,23" fill="none" stroke="#FF9A9D" stroke-width="2.2" stroke-linecap="round" opacity="0.95"/>
-            <path id="f-travel" d="M202,109.5 C221,109.5 238,86 258,61" fill="none" stroke="#FF9A9D" stroke-width="2.2" stroke-linecap="round" opacity="0.95"/>
-            <path id="f-shopping" d="M206.5,123.5 C224,123.5 242,109 258,97" fill="none" stroke="#FF9A9D" stroke-width="2.2" stroke-linecap="round" opacity="0.95"/>
-            <!-- Health has tiny blue stub at center + coral -->
-            <path d="M208,135.5 L216,135.5" fill="none" stroke="#9AB6FF" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
-            <path id="f-health" d="M216,135.5 C232,135.5 244,138 258,133" fill="none" stroke="#FF9A9D" stroke-width="2.2" stroke-linecap="round" opacity="0.95"/>
+              <path id="f-food" d="M189,95 C210,95 232,62 258,23" fill="none" stroke="#FF9A9D" stroke-width="2.2" stroke-linecap="round" opacity="0.95"/>
+              <path id="f-travel" d="M202,109.5 C221,109.5 238,86 258,61" fill="none" stroke="#FF9A9D" stroke-width="2.2" stroke-linecap="round" opacity="0.95"/>
+              <path id="f-shopping" d="M206.5,123.5 C224,123.5 242,109 258,97" fill="none" stroke="#FF9A9D" stroke-width="2.2" stroke-linecap="round" opacity="0.95"/>
+              <path d="M208,135.5 L216,135.5" fill="none" stroke="#9AB6FF" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>
+              <path id="f-health" d="M216,135.5 C232,135.5 244,138 258,133" fill="none" stroke="#FF9A9D" stroke-width="2.2" stroke-linecap="round" opacity="0.95"/>
+              <path id="f-subs" d="M203,152 C226,152 242,163 258,169" fill="none" stroke="#FF9A9D" stroke-width="2.2" stroke-linecap="round" opacity="0.95"/>
+              <path id="f-savings" d="M195,162 C218,162 238,186 258,201" fill="none" stroke="#8AAEFF" stroke-width="9" stroke-linecap="round" opacity="0.92"/>
+              <path id="f-others" d="M184,174 C212,174 232,210 258,235" fill="none" stroke="#A8A0FF" stroke-width="17" stroke-linecap="round" opacity="0.92"/>
+              <path d="M249,232 C253,233.8 256,234.8 260,235.2" fill="none" stroke="#FF9C82" stroke-width="9.5" stroke-linecap="round" opacity="0.98"/>
 
-            <path id="f-subs" d="M203,152 C226,152 242,163 258,169" fill="none" stroke="#FF9A9D" stroke-width="2.2" stroke-linecap="round" opacity="0.95"/>
+              <!-- ===== CENTER BALANCE ===== -->
+              <g id="center">
+                <circle cx="175" cy="132.5" r="44" fill="white" stroke="#D7E2FF" stroke-width="1.6"/>
+                <circle cx="175" cy="132.5" r="44" fill="none" stroke="#C2B2FF" stroke-width="1.2" opacity="0.55" stroke-dasharray="0 0"/>
+                <circle cx="175" cy="132.5" r="38" fill="url(#centerGlow)" stroke="#E8E6F3" stroke-width="1"/>
+                <circle cx="175" cy="132.5" r="35" fill="white" stroke="#F0EEF6" stroke-width="1"/>
+                <path d="M 188.5 108.5 A 33 33 0 0 1 208 127" fill="none" stroke="#FF6E7A" stroke-width="2.8" stroke-linecap="round" opacity="0.95"/>
+                <path d="M 202 128 A 38 38 0 0 1 207 131" fill="none" stroke="#8AAEFF" stroke-width="2.2" stroke-linecap="round"/>
+                <text x="175" y="124.5" text-anchor="middle" font-family="system-ui, sans-serif" font-size="7.2" font-weight="600" letter-spacing="0.08em" fill="#9AA0B2">DEBT</text>
+                <text x="175" y="141" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14.5" font-weight="800" fill="#1E1C27">₹8.4L</text>
+              </g>
 
-            <!-- Savings - medium blue -->
-            <path id="f-savings" d="M195,162 C218,162 238,186 258,201" fill="none" stroke="#8AAEFF" stroke-width="9" stroke-linecap="round" opacity="0.92"/>
-            <!-- Others - thick lavender + peach tip -->
-            <path id="f-others" d="M184,174 C212,174 232,210 258,235" fill="none" stroke="#A8A0FF" stroke-width="17" stroke-linecap="round" opacity="0.92"/>
-            <path d="M249,232 C253,233.8 256,234.8 260,235.2" fill="none" stroke="#FF9C82" stroke-width="9.5" stroke-linecap="round" opacity="0.98"/>
+              <!-- ===== LEFT NODES — ANNUAL INCOME ===== -->
+              <g filter="url(#cardShadow)">
+                <rect x="12" y="46" width="84" height="42" rx="11" fill="#ECE9FF" stroke="#DAD6F6" stroke-width="1.1"/>
+                <text x="24" y="64" font-family="system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#2B2740">Salary</text>
+                <text x="24" y="76.5" font-family="system-ui, sans-serif" font-size="8" font-weight="600" fill="#6B6786">₹18L</text>
+                <path d="M88 81 L90 81 L90 83" fill="none" stroke="#A99EDF" stroke-width="0.7" stroke-linecap="round" opacity="0.7"/>
+              </g>
+              <g filter="url(#cardShadow)">
+                <rect x="12" y="150" width="84" height="36" rx="11" fill="#DDF3F0" stroke="#C6E8E2" stroke-width="1.1"/>
+                <text x="24" y="166.5" font-family="system-ui, sans-serif" font-size="8.2" font-weight="600" fill="#26413E">Other Income</text>
+                <text x="24" y="178" font-family="system-ui, sans-serif" font-size="8" font-weight="600" fill="#5A817B">₹47.2K</text>
+                <path d="M88 180 L90 180 L90 182" fill="none" stroke="#8ACBC0" stroke-width="0.7" stroke-linecap="round" opacity="0.7"/>
+              </g>
 
-            <!-- ===== CENTER BALANCE ===== -->
-            <g id="center">
-              <!-- outer ring -->
-              <circle cx="175" cy="132.5" r="44" fill="white" stroke="#D7E2FF" stroke-width="1.6"/>
-              <circle cx="175" cy="132.5" r="44" fill="none" stroke="#C2B2FF" stroke-width="1.2" opacity="0.55" stroke-dasharray="0 0"/>
-              <!-- inner core -->
-              <circle cx="175" cy="132.5" r="38" fill="url(#centerGlow)" stroke="#E8E6F3" stroke-width="1"/>
-              <circle cx="175" cy="132.5" r="35" fill="white" stroke="#F0EEF6" stroke-width="1"/>
-              <!-- red arc indicating negative -->
-              <path d="M 188.5 108.5 A 33 33 0 0 1 208 127" fill="none" stroke="#FF6E7A" stroke-width="2.8" stroke-linecap="round" opacity="0.95"/>
-              <!-- tiny blue tick on ring -->
-              <path d="M 202 128 A 38 38 0 0 1 207 131" fill="none" stroke="#8AAEFF" stroke-width="2.2" stroke-linecap="round"/>
-              <text x="175" y="124.5" text-anchor="middle" font-family="system-ui, sans-serif" font-size="7.2" font-weight="600" letter-spacing="0.08em" fill="#9AA0B2">BALANCE</text>
-              <text x="175" y="141" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14.5" font-weight="800" fill="#1E1C27">₹-8.4L</text>
-            </g>
+              <!-- ===== RIGHT NODES — ANNUAL EXPENSES (sum = ₹21.07L) ===== -->
+              <g filter="url(#cardShadow)">
+                <rect x="258" y="8" width="88" height="30" rx="9" fill="#FFF2E8" stroke="#FFE1CC" stroke-width="1"/>
+                <text x="267" y="19.5" font-family="system-ui, sans-serif" font-size="8.8" font-weight="700" fill="#3F2F26">Food</text>
+                <text x="267" y="30.5" font-family="system-ui, sans-serif" font-size="7.6" font-weight="600" fill="#8A7568">₹1.56L</text>
+              </g>
+              <g filter="url(#cardShadow)">
+                <rect x="258" y="44" width="88" height="30" rx="9" fill="#EAF2FF" stroke="#D4E6FF" stroke-width="1"/>
+                <text x="267" y="55.5" font-family="system-ui, sans-serif" font-size="8.8" font-weight="700" fill="#24344E">Travel</text>
+                <text x="267" y="66.5" font-family="system-ui, sans-serif" font-size="7.6" font-weight="600" fill="#6B7E98">₹4.08L</text>
+              </g>
+              <g filter="url(#cardShadow)">
+                <rect x="258" y="80" width="88" height="30" rx="9" fill="#F2E8FF" stroke="#E2D3FF" stroke-width="1"/>
+                <text x="267" y="91.5" font-family="system-ui, sans-serif" font-size="8.8" font-weight="700" fill="#35294B">Shopping</text>
+                <text x="267" y="102.5" font-family="system-ui, sans-serif" font-size="7.6" font-weight="600" fill="#7A6A96">₹3.56L</text>
+              </g>
+              <g filter="url(#cardShadow)">
+                <rect x="258" y="116" width="88" height="30" rx="9" fill="#FFE6F0" stroke="#FFD0E1" stroke-width="1"/>
+                <text x="267" y="127.5" font-family="system-ui, sans-serif" font-size="8.8" font-weight="700" fill="#4D2736">Health</text>
+                <text x="267" y="138.5" font-family="system-ui, sans-serif" font-size="7.6" font-weight="600" fill="#9A6A7E">₹3.29L</text>
+              </g>
+              <g filter="url(#cardShadow)">
+                <rect x="258" y="152" width="88" height="30" rx="9" fill="#FFF5DC" stroke="#FFEAB8" stroke-width="1"/>
+                <text x="267" y="163.5" font-family="system-ui, sans-serif" font-size="8.8" font-weight="700" fill="#4A3C22">Subs</text>
+                <text x="267" y="174.5" font-family="system-ui, sans-serif" font-size="7.6" font-weight="600" fill="#8A7C5E">₹0.88L</text>
+              </g>
+              <g filter="url(#cardShadow)">
+                <rect x="258" y="188" width="88" height="30" rx="9" fill="#E2F5EA" stroke="#C6EAD8" stroke-width="1"/>
+                <text x="267" y="199.5" font-family="system-ui, sans-serif" font-size="8.8" font-weight="700" fill="#244636">Savings</text>
+                <text x="267" y="210.5" font-family="system-ui, sans-serif" font-size="7.6" font-weight="600" fill="#5F8572">₹12L</text>
+              </g>
+              <g filter="url(#cardShadow)">
+                <rect x="258" y="224" width="88" height="30" rx="9" fill="#EFF2F7" stroke="#DFE5EF" stroke-width="1"/>
+                <text x="267" y="235.5" font-family="system-ui, sans-serif" font-size="8.8" font-weight="700" fill="#2E3440">Others</text>
+                <text x="267" y="246.5" font-family="system-ui, sans-serif" font-size="7.6" font-weight="600" fill="#7A808E">₹1.80L</text>
+              </g>
 
-            <!-- ===== LEFT NODES ===== -->
-            <g filter="url(#cardShadow)">
-              <rect x="12" y="46" width="84" height="42" rx="11" fill="#ECE9FF" stroke="#DAD6F6" stroke-width="1.1"/>
-              <text x="24" y="64" font-family="system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#2B2740">Salary</text>
-              <text x="24" y="76.5" font-family="system-ui, sans-serif" font-size="8" font-weight="600" fill="#6B6786">₹1.5L</text>
-              <!-- tiny corner mark -->
-              <path d="M88 81 L90 81 L90 83" fill="none" stroke="#A99EDF" stroke-width="0.7" stroke-linecap="round" opacity="0.7"/>
-            </g>
-            <g filter="url(#cardShadow)">
-              <rect x="12" y="150" width="84" height="36" rx="11" fill="#DDF3F0" stroke="#C6E8E2" stroke-width="1.1"/>
-              <text x="24" y="166.5" font-family="system-ui, sans-serif" font-size="8.2" font-weight="600" fill="#26413E">Other Income</text>
-              <text x="24" y="178" font-family="system-ui, sans-serif" font-size="8" font-weight="600" fill="#5A817B">₹47.2K</text>
-              <path d="M88 180 L90 180 L90 182" fill="none" stroke="#8ACBC0" stroke-width="0.7" stroke-linecap="round" opacity="0.7"/>
-            </g>
-
-            <!-- ===== RIGHT NODES ===== -->
-            <g filter="url(#cardShadow)">
-              <rect x="258" y="8" width="88" height="30" rx="9" fill="#FFF2E8" stroke="#FFE1CC" stroke-width="1"/>
-              <text x="267" y="19.5" font-family="system-ui, sans-serif" font-size="8.8" font-weight="700" fill="#3F2F26">Food</text>
-              <text x="267" y="30.5" font-family="system-ui, sans-serif" font-size="7.6" font-weight="600" fill="#8A7568">₹129.9K</text>
-            </g>
-            <g filter="url(#cardShadow)">
-              <rect x="258" y="44" width="88" height="30" rx="9" fill="#EAF2FF" stroke="#D4E6FF" stroke-width="1"/>
-              <text x="267" y="55.5" font-family="system-ui, sans-serif" font-size="8.8" font-weight="700" fill="#24344E">Travel</text>
-              <text x="267" y="66.5" font-family="system-ui, sans-serif" font-size="7.6" font-weight="600" fill="#6B7E98">₹340.3K</text>
-            </g>
-            <g filter="url(#cardShadow)">
-              <rect x="258" y="80" width="88" height="30" rx="9" fill="#F2E8FF" stroke="#E2D3FF" stroke-width="1"/>
-              <text x="267" y="91.5" font-family="system-ui, sans-serif" font-size="8.8" font-weight="700" fill="#35294B">Shopping</text>
-              <text x="267" y="102.5" font-family="system-ui, sans-serif" font-size="7.6" font-weight="600" fill="#7A6A96">₹296.4K</text>
-            </g>
-            <g filter="url(#cardShadow)">
-              <rect x="258" y="116" width="88" height="30" rx="9" fill="#FFE6F0" stroke="#FFD0E1" stroke-width="1"/>
-              <text x="267" y="127.5" font-family="system-ui, sans-serif" font-size="8.8" font-weight="700" fill="#4D2736">Health</text>
-              <text x="267" y="138.5" font-family="system-ui, sans-serif" font-size="7.6" font-weight="600" fill="#9A6A7E">₹274.1K</text>
-            </g>
-            <g filter="url(#cardShadow)">
-              <rect x="258" y="152" width="88" height="30" rx="9" fill="#FFF5DC" stroke="#FFEAB8" stroke-width="1"/>
-              <text x="267" y="163.5" font-family="system-ui, sans-serif" font-size="8.8" font-weight="700" fill="#4A3C22">Subs</text>
-              <text x="267" y="174.5" font-family="system-ui, sans-serif" font-size="7.6" font-weight="600" fill="#8A7C5E">₹73.0K</text>
-            </g>
-            <g filter="url(#cardShadow)">
-              <rect x="258" y="188" width="88" height="30" rx="9" fill="#E2F5EA" stroke="#C6EAD8" stroke-width="1"/>
-              <text x="267" y="199.5" font-family="system-ui, sans-serif" font-size="8.8" font-weight="700" fill="#244636">Savings</text>
-              <text x="267" y="210.5" font-family="system-ui, sans-serif" font-size="7.6" font-weight="600" fill="#5F8572">₹12L</text>
-            </g>
-            <g filter="url(#cardShadow)">
-              <rect x="258" y="224" width="88" height="30" rx="9" fill="#EFF2F7" stroke="#DFE5EF" stroke-width="1"/>
-              <text x="267" y="235.5" font-family="system-ui, sans-serif" font-size="8.8" font-weight="700" fill="#2E3440">Others</text>
-              <text x="267" y="246.5" font-family="system-ui, sans-serif" font-size="7.6" font-weight="600" fill="#7A808E">₹7.7L</text>
-            </g>
-
-            <!-- ===== ANIMATED DOTS (subtle flow) ===== -->
-            <g opacity="0.95">
-              <circle r="2.2" fill="white" opacity="0.9">
-                <animateMotion dur="2.8s" repeatCount="indefinite" rotate="auto">
-                  <mpath href="#f-salary"/>
-                </animateMotion>
-              </circle>
-              <circle r="1.6" fill="#FF8E9A" opacity="0.9">
-                <animateMotion dur="2.2s" repeatCount="indefinite" begin="0.4s">
-                  <mpath href="#f-food"/>
-                </animateMotion>
-              </circle>
-              <circle r="1.6" fill="#FF8E9A" opacity="0.9">
-                <animateMotion dur="2.35s" repeatCount="indefinite" begin="0.9s">
-                  <mpath href="#f-travel"/>
-                </animateMotion>
-              </circle>
-              <circle r="1.6" fill="#8AAEFF" opacity="0.9">
-                <animateMotion dur="2.6s" repeatCount="indefinite" begin="0.2s">
-                  <mpath href="#f-savings"/>
-                </animateMotion>
-              </circle>
-              <circle r="2" fill="white" opacity="0.95">
-                <animateMotion dur="3.1s" repeatCount="indefinite" begin="0.6s">
-                  <mpath href="#f-others"/>
-                </animateMotion>
-              </circle>
-            </g>
-          </svg>
-          <div class="sankey-shimmer"></div>
+              <!-- ===== ANIMATED DOTS (subtle flow) ===== -->
+              <g opacity="0.95">
+                <circle r="2.2" fill="white" opacity="0.9">
+                  <animateMotion dur="2.8s" repeatCount="indefinite" rotate="auto">
+                    <mpath href="#f-salary"/>
+                  </animateMotion>
+                </circle>
+                <circle r="1.6" fill="#FF8E9A" opacity="0.9">
+                  <animateMotion dur="2.2s" repeatCount="indefinite" begin="0.4s">
+                    <mpath href="#f-food"/>
+                  </animateMotion>
+                </circle>
+                <circle r="1.6" fill="#FF8E9A" opacity="0.9">
+                  <animateMotion dur="2.35s" repeatCount="indefinite" begin="0.9s">
+                    <mpath href="#f-travel"/>
+                  </animateMotion>
+                </circle>
+                <circle r="1.6" fill="#8AAEFF" opacity="0.9">
+                  <animateMotion dur="2.6s" repeatCount="indefinite" begin="0.2s">
+                    <mpath href="#f-savings"/>
+                  </animateMotion>
+                </circle>
+                <circle r="2" fill="white" opacity="0.95">
+                  <animateMotion dur="3.1s" repeatCount="indefinite" begin="0.6s">
+                    <mpath href="#f-others"/>
+                  </animateMotion>
+                </circle>
+              </g>
+            </svg>
+            <div class="sankey-shimmer"></div>
+          </div>
         </div>
       </div>
 
       <!-- FACE 2 – BACK – DONUT -->
       <div class="face face-back" id="donut-face">
-        <div class="face-label">Allocation</div>
-        <div class="chart-wrap">
-          <canvas id="donut-canvas" width="240" height="220"></canvas>
+        <div class="face-inner face-back-inner">
+          <div class="face-label">Allocation</div>
+          <div class="chart-wrap">
+            <canvas id="donut-canvas" width="240" height="220"></canvas>
+          </div>
         </div>
       </div>
 
       <!-- FACE 3 – RIGHT – AREA -->
       <div class="face face-right" id="area-face">
-        <div class="face-label"> Trends</div>
-        <div class="chart-wrap">
-          <canvas id="area-canvas" width="260" height="210"></canvas>
+        <div class="face-inner face-right-inner">
+          <div class="face-label"> Trends</div>
+          <div class="chart-wrap">
+            <canvas id="area-canvas" width="260" height="210"></canvas>
+          </div>
         </div>
       </div>
 
       <!-- FACE 4 – LEFT – MULTI-BAR -->
       <div class="face face-left" id="bar-face">
-        <div class="face-label"> Income vs Expenses </div>
-        <div class="chart-wrap">
-          <canvas id="bar-canvas" width="260" height="210"></canvas>
+        <div class="face-inner face-left-inner">
+          <div class="face-label"> Income vs Expenses </div>
+          <div class="chart-wrap">
+            <canvas id="bar-canvas" width="260" height="210"></canvas>
+          </div>
         </div>
       </div>
 
       <!-- FACE 5 – TOP – LINE -->
       <div class="face face-top" id="line-face">
-        <div class="face-label">Tracking yours goals </div> 
-        <div class="chart-wrap">
-          <canvas id="line-canvas" width="260" height="210"></canvas>
+        <div class="face-inner face-top-inner">
+          <div class="face-label">Tracking your goals</div>
+          <div class="chart-wrap">
+            <canvas id="line-canvas" width="260" height="210"></canvas>
+          </div>
         </div>
       </div>
 
       <!-- FACE 6 – BOTTOM – RADAR -->
       <div class="face face-bottom" id="radar-face">
-        <div class="face-label">Health Score </div>
-        <div class="chart-wrap">
-          <canvas id="radar-canvas" width="240" height="220"></canvas>
+        <div class="face-inner face-bottom-inner">
+          <div class="face-label">Health Score</div>
+          <div class="chart-wrap">
+            <canvas id="radar-canvas" width="240" height="220"></canvas>
+          </div>
         </div>
       </div>
 
@@ -475,11 +476,6 @@
 </div><!-- #scene -->
 
 
-
-  <div id="zoom-controls" aria-label="Cube zoom controls">
-    <button id="zoom-out" type="button" aria-label="Zoom out">-</button>
-    <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
-  </div>
 
 <!-- Tooltip -->
 <div class="chart-tooltip" id="tooltip"></div>
@@ -494,8 +490,6 @@
   const cube = document.getElementById('cube');
   const floatWrap = document.getElementById('float-wrap');
   const scene = document.getElementById('scene');
-  const zoomInButton = document.getElementById('zoom-in');
-  const zoomOutButton = document.getElementById('zoom-out');
 
   let rotX = -20, rotY = 25;        // initial angle
   let velX = 0,   velY = 0;
@@ -528,6 +522,68 @@
     // A tiny automatic scale pulse keeps the cube alive without adding GPU-heavy effects.
     const breathe = reduceMotion ? 1 : 1 + Math.sin(now * 0.001) * 0.022;
     cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${zoom * breathe})`;
+    // Keep each face's text upright regardless of cube rotation —
+    // see applyCounterRotation() for the maths.
+    applyCounterRotation();
+  }
+
+  /* Per-face counter-rotation so text never appears upside-down
+     or mirrored as the cube spins.
+
+     Effective orientation seen by the face-inner content is:
+         R_cube * R_face * R_inner
+     where R_cube = rotateX(rotX) rotateY(rotY)
+           R_face = the face's static placement (translateZ + rotation)
+           R_inner = whatever we set on .face-inner
+
+     We want R_inner to cancel out everything so the content is
+     upright, i.e. R_inner = (R_cube * R_face)^-1
+                                = R_face^-1 * R_cube^-1
+     The CSS transform list reads left-to-right but is applied
+     right-to-left, so the inverse of `rotateX(a) rotateY(b)` is
+     `rotateY(-b) rotateX(-a)`.
+
+     R_face is a 3D placement:  translateZ(d) followed by a
+     rotation.  R_face^-1 is the inverse rotation; translateZ is
+     a pure translation, its inverse is a translateZ(-d), but
+     since translateZ doesn't change orientation we can drop it
+     from the inner transform — the face is already positioned
+     in 3D by its outer transform.
+
+     Per-face static inverse rotation:
+        front  :  identity
+        back   :  rotateY(180)   (its visible side is hidden by
+                                   backface-visibility anyway)
+        right  :  rotateY(-90)
+        left   :  rotateY( 90)
+        top    :  rotateX(-90)
+        bottom :  rotateX( 90)
+  */
+  const faceInners = {
+    front:  document.querySelector('#sankey-face .face-inner'),
+    back:   document.querySelector('#donut-face  .face-inner'),
+    right:  document.querySelector('#area-face   .face-inner'),
+    left:   document.querySelector('#bar-face    .face-inner'),
+    top:    document.querySelector('#line-face   .face-inner'),
+    bottom: document.querySelector('#radar-face  .face-inner'),
+  };
+  const FACE_INV = {
+    front:  '',
+    back:   'rotateY(180deg) ',
+    right:  'rotateY(-90deg) ',
+    left:   'rotateY(90deg) ',
+    top:    'rotateX(-90deg) ',
+    bottom: 'rotateX(90deg) ',
+  };
+
+  function applyCounterRotation() {
+    // inverse of cube's rotation, in CSS list order
+    const invCube = `rotateY(${-rotY}deg) rotateX(${-rotX}deg) `;
+    for (const key in faceInners) {
+      const el = faceInners[key];
+      if (!el) continue;
+      el.style.transform = FACE_INV[key] + invCube;
+    }
   }
 
   function tick(now) {
@@ -609,8 +665,6 @@
     setZoom(targetZoom * Math.exp(-e.deltaY * 0.0012));
   }, { passive: false });
 
-  zoomInButton.addEventListener('click', () => setZoom(targetZoom + 0.12));
-  zoomOutButton.addEventListener('click', () => setZoom(targetZoom - 0.12));
   cube.addEventListener('dblclick', () => setZoom(1));
 
   cube.addEventListener('touchstart', e => {
@@ -651,7 +705,16 @@
 
 
 /* ════════════════════════════════════════════════════════════════════
-   CHART UTILITIES
+   CHART UTILITIES + SHARED DATASET
+   Annual story (FY 2025-26):
+     Salary:      ₹18L       Food:      ₹1.56L
+     Other Inc:   ₹47.2K     Travel:    ₹4.08L
+     Total In:    ₹18.47L    Shopping:  ₹3.56L
+                            Health:     ₹3.29L
+     Savings:     ₹12L       Subs:      ₹0.88L
+                            Others:     ₹1.80L
+                            Total Out:  ₹21.07L
+     Balance:     ₹8.4L (debt)
 ════════════════════════════════════════════════════════════════════ */
 const C = {
   accent:  '#6c63ff',
@@ -674,6 +737,14 @@ function hexToRgba(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
+/* Indian number formatting: 1234567 → ₹12.34L, 10000000 → ₹1Cr */
+function inrShort(n) {
+  if (n >= 1e7) return `₹${(n/1e7).toFixed(n % 1e7 === 0 ? 0 : 2)}Cr`;
+  if (n >= 1e5) return `₹${(n/1e5).toFixed(n % 1e5 === 0 ? 0 : 2)}L`;
+  if (n >= 1e3) return `₹${(n/1e3).toFixed(n % 1e3 === 0 ? 0 : 1)}K`;
+  return `₹${n}`;
+}
+
 /* animated progress 0→1 */
 function animateDraw(duration, onFrame, onDone) {
   const start = performance.now();
@@ -688,18 +759,20 @@ function animateDraw(duration, onFrame, onDone) {
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   FACE 2 – DONUT CHART
+   FACE 2 – DONUT CHART (ALLOCATION)
+   ₹12L portfolio split: 42% Stocks, 25% Bonds, 18% Crypto, 15% Cash
 ════════════════════════════════════════════════════════════════════ */
 (function DonutChart() {
   const canvas = document.getElementById('donut-canvas');
   const ctx    = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
 
+  // Percentages and underlying ₹ values (sum to ₹12L = ₹12,00,000)
   const data = [
-    { label: 'Stocks',  value: 42, color: C.accent  },
-    { label: 'Crypto',  value: 18, color: C.accent3 },
-    { label: 'Bonds',   value: 25, color: C.accent2 },
-    { label: 'Cash',    value: 15, color: C.accent4 },
+    { label: 'Stocks',  pct: 42, value: 504000, color: C.accent  }, // ₹5.04L
+    { label: 'Bonds',   pct: 25, value: 300000, color: C.accent2 }, // ₹3.00L
+    { label: 'Crypto',  pct: 18, value: 216000, color: C.accent3 }, // ₹2.16L
+    { label: 'Cash',    pct: 15, value: 180000, color: C.accent4 }, // ₹1.80L
   ];
   const total = data.reduce((s,d)=>s+d.value,0);
   const cx = W/2, cy = H/2 - 10;
@@ -720,7 +793,6 @@ function animateDraw(duration, onFrame, onDone) {
       return { ...d, startAngle, sweep };
       startAngle += sweep + GAP;
     });
-    // recalc with gaps
     let angle = -Math.PI/2;
     slices.forEach((s,i) => {
       s.startAngle = angle;
@@ -735,7 +807,6 @@ function animateDraw(duration, onFrame, onDone) {
       const oR = outerR * pulse + (hovered ? 8 : 0);
       const iR = innerR;
 
-      // glow
       if (hovered) {
         ctx.save();
         ctx.shadowBlur = 18;
@@ -753,12 +824,12 @@ function animateDraw(duration, onFrame, onDone) {
       if (hovered) ctx.restore();
     });
 
-    // center text
+    // center text — total portfolio (in ₹)
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = C.text;
     ctx.font = `bold 22px system-ui`;
-    ctx.fillText('$48.5K', cx, cy - 6);
+    ctx.fillText('₹12L', cx, cy - 6);
     ctx.fillStyle = C.muted;
     ctx.font = `10px system-ui`;
     ctx.fillText('Total Portfolio', cx, cy + 14);
@@ -777,7 +848,6 @@ function animateDraw(duration, onFrame, onDone) {
     });
   }
 
-  // idle animation: gentle pulse on each slice
   function idleTick() {
     pulseT += 0.04;
     draw(1);
@@ -789,20 +859,24 @@ function animateDraw(duration, onFrame, onDone) {
 
 
 /* ════════════════════════════════════════════════════════════════════
-   FACE 3 – AREA CHART
+   FACE 3 – AREA CHART (MONTHLY SPENDING TREND, FY 2025-26)
+   Monthly expenses that sum to ₹21.07L over 12 months
+   Range ₹1.4L – ₹2.2L per month
 ════════════════════════════════════════════════════════════════════ */
 (function AreaChart() {
   const canvas = document.getElementById('area-canvas');
   const ctx    = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
 
-  const months  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const values  = [22.1, 23.5, 22.8, 25.2, 27.0, 26.4, 29.1, 31.5, 30.2, 33.8, 35.1, 38.4];
-  const PAD = { t:20, r:14, b:28, l:38 };
+  // Monthly spend (in ₹ Lakhs).  Sum = 21.07L
+  const months  = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+  // FY 2025-26: in lakhs
+  const values  = [1.65, 1.78, 1.62, 1.70, 1.85, 1.55, 1.92, 1.74, 1.88, 1.66, 1.79, 1.93];
+  const PAD = { t:20, r:14, b:28, l:42 };
   const W2 = W - PAD.l - PAD.r;
   const H2 = H - PAD.t - PAD.b;
 
-  const minV = 20, maxV = 42;
+  const minV = 1.4, maxV = 2.2;     // in Lakhs
   function px(i)  { return PAD.l + (i/(values.length-1))*W2; }
   function py(v)  { return PAD.t + H2 - ((v-minV)/(maxV-minV))*H2; }
 
@@ -811,15 +885,15 @@ function animateDraw(duration, onFrame, onDone) {
   function draw(p) {
     ctx.clearRect(0,0,W,H);
 
-    // grid lines
-    [25,30,35,40].forEach(v => {
+    // grid lines + ₹L labels
+    [1.6, 1.8, 2.0, 2.2].forEach(v => {
       const y = py(v);
       ctx.beginPath();
       ctx.moveTo(PAD.l, y); ctx.lineTo(W-PAD.r, y);
       ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.stroke();
       ctx.fillStyle = C.muted; ctx.font = '8px system-ui';
       ctx.textAlign = 'right';
-      ctx.fillText(`$${v}K`, PAD.l - 3, y + 3);
+      ctx.fillText(`₹${v.toFixed(1)}L`, PAD.l - 3, y + 3);
     });
 
     // build points up to progress
@@ -898,20 +972,25 @@ function animateDraw(duration, onFrame, onDone) {
 
 
 /* ════════════════════════════════════════════════════════════════════
-   FACE 4 – MULTI-BAR CHART
+   FACE 4 – MULTI-BAR CHART (HALF-YEAR INCOME vs EXPENSES)
+   6-month view. Income × 6 ≈ ₹9L (half of ₹18L salary).
+   Expenses × 6 ≈ ₹10.5L (half of ₹21.07L).
 ════════════════════════════════════════════════════════════════════ */
 (function BarChart() {
   const canvas = document.getElementById('bar-canvas');
   const ctx    = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
 
-  const cats    = ['Jan','Feb','Mar','Apr','May','Jun'];
-  const income  = [5200, 5800, 5400, 6200, 6800, 7100];
-  const expense = [3800, 4100, 3900, 4400, 4700, 4900];
-  const PAD = { t:20, r:14, b:28, l:38 };
+  // H1 of FY 2025-26 (Apr–Sep). Income + Other-income averaged.
+  // Income (₹)   : 1.50L, 1.55L, 1.45L, 1.50L, 1.60L, 1.55L   →  sum ₹9.15L
+  // Expenses (₹) : 1.65L, 1.78L, 1.62L, 1.70L, 1.85L, 1.55L   →  sum ₹10.15L
+  const cats    = ['Apr','May','Jun','Jul','Aug','Sep'];
+  const income  = [150000, 155000, 145000, 150000, 160000, 155000];
+  const expense = [165000, 178000, 162000, 170000, 185000, 155000];
+  const PAD = { t:20, r:14, b:28, l:42 };
   const W2 = W - PAD.l - PAD.r;
   const H2 = H - PAD.t - PAD.b;
-  const maxV = 8000;
+  const maxV = 200000;             // ₹2L ceiling (axis in ₹)
   const groupW = W2 / cats.length;
   const barW   = groupW * 0.3;
 
@@ -923,14 +1002,14 @@ function animateDraw(duration, onFrame, onDone) {
   function draw(p) {
     ctx.clearRect(0,0,W,H);
 
-    // grid
-    [2000,4000,6000,8000].forEach(v => {
+    // grid (₹ in Lakhs) — 4 ticks
+    [50000, 100000, 150000, 200000].forEach(v => {
       const y = py(v);
       ctx.beginPath();
       ctx.moveTo(PAD.l,y); ctx.lineTo(W-PAD.r,y);
       ctx.strokeStyle = C.grid; ctx.lineWidth=1; ctx.stroke();
       ctx.fillStyle=C.muted; ctx.font='8px system-ui'; ctx.textAlign='right';
-      ctx.fillText(`$${v/1000}K`, PAD.l-3, y+3);
+      ctx.fillText(`₹${(v/100000).toFixed(1)}L`, PAD.l-3, y+3);
     });
 
     cats.forEach((cat,i) => {
@@ -985,22 +1064,51 @@ function animateDraw(duration, onFrame, onDone) {
 
 
 /* ════════════════════════════════════════════════════════════════════
-   FACE 5 – LINE CHART (multi-line)
+   FACE 5 – LINE CHART (TRACKING YOUR GOALS)
+   6 quarters Q1..Q6. Y-axis in ₹20L increments: 20L, 40L, 60L, 80L, 1Cr.
+   Two lines: Savings Target (solid) vs Actual (dashed).
+   Subtle emoji markers for life goals.
 ════════════════════════════════════════════════════════════════════ */
 (function LineChart() {
   const canvas = document.getElementById('line-canvas');
   const ctx    = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
 
-  const weeks = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10'];
-  const rev   = [12.2,13.5,12.8,15.1,14.7,16.2,17.8,16.5,19.2,21.0];
-  const prof  = [3.1, 3.8, 3.2, 4.5, 4.1, 5.0, 5.9, 5.2, 6.8, 7.5];
-  const PAD   = { t:20, r:14, b:28, l:38 };
-  const W2 = W-PAD.l-PAD.r, H2 = H-PAD.t-PAD.b;
-  const minV=0, maxV=25;
+  // 6 quarters Q1..Q6 — cumulative savings (₹).
+  // Target grows linearly to ₹1.2Cr; actual tracks slightly below.
+  const quarters = ['Q1','Q2','Q3','Q4','Q5','Q6'];
+  // Target (₹): 0 → ₹1.2Cr in 6 quarters (₹20L/quarter steady pace)
+  // Values are in raw rupees, NOT lakhs.
+  const target  = [2000000, 4000000, 6000000, 8000000, 10000000, 12000000];
+  // Actual: realistic story — slightly behind target.
+  //   After 6 quarters actual is ₹1.04Cr (₹1.2Cr target — ₹8.4L of debt
+  //   carried from the year reflected on the Sankey face).
+  const actual  = [1800000, 3500000, 5200000, 7000000, 8800000, 10400000];
 
-  function px(i) { return PAD.l + (i/(weeks.length-1))*W2; }
+  // Goal markers (subtle emoji) on the target line at the quarter the
+  // goal would be hit.  Only 3 markers, kept tiny and low-opacity so the
+  // chart doesn't get cluttered.
+  const goals = [
+    { qIdx: 1, emoji: '🏠', label: 'Home'  },  // ₹40L down-payment goal
+    { qIdx: 3, emoji: '🚗', label: 'Car'   },  // ₹80L
+    { qIdx: 5, emoji: '✈️', label: 'Travel'},  // ₹1.2Cr
+  ];
+
+  const PAD   = { t:24, r:14, b:28, l:42 };
+  const W2 = W-PAD.l-PAD.r, H2 = H-PAD.t-PAD.b;
+  // Y-axis ₹20L increments up to ₹1.2Cr.  Show ₹20L, ₹40L, ₹60L,
+  // ₹80L, ₹1Cr, ₹1.2Cr.
+  const ticks = [2000000, 4000000, 6000000, 8000000, 10000000, 12000000];
+  const minV=0, maxV=12000000;
+
+  function px(i) { return PAD.l + (i/(quarters.length-1))*W2; }
   function py(v) { return PAD.t + H2 - ((v-minV)/(maxV-minV))*H2; }
+  // Render an axis tick in the Indian money format
+  function tickLabel(v) {
+    if (v >= 1e7) return `₹${v/1e7 === Math.floor(v/1e7) ? v/1e7 : (v/1e7).toFixed(2)}Cr`;
+    if (v >= 1e5) return `₹${v/1e5}L`;
+    return `₹${v}`;
+  }
 
   let dotT = 0;
 
@@ -1027,54 +1135,73 @@ function animateDraw(duration, onFrame, onDone) {
     ctx.lineDashOffset = 0;
   }
 
+  function drawEmoji(x, y, emoji) {
+    // subtle, small, low-opacity so it doesn't dominate the chart
+    ctx.save();
+    ctx.globalAlpha = 0.85;
+    ctx.font = '10px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(emoji, x, y);
+    ctx.restore();
+  }
+
   function draw(p) {
     ctx.clearRect(0,0,W,H);
 
     // grid
-    [5,10,15,20,25].forEach(v => {
+    ticks.forEach(v => {
       const y = py(v);
       ctx.beginPath();
       ctx.moveTo(PAD.l,y); ctx.lineTo(W-PAD.r,y);
       ctx.strokeStyle=C.grid; ctx.lineWidth=1; ctx.stroke();
       ctx.fillStyle=C.muted; ctx.font='8px system-ui'; ctx.textAlign='right';
-      ctx.fillText(`$${v}K`,PAD.l-3,y+3);
+      ctx.fillText(tickLabel(v), PAD.l-3, y+3);
     });
 
-    const cnt = Math.max(2, Math.round(p*weeks.length));
-    const revPts  = Array.from({length:cnt},(_,i)=>[px(i),py(rev[i])]);
-    const profPts = Array.from({length:cnt},(_,i)=>[px(i),py(prof[i])]);
+    const cnt = Math.max(2, Math.round(p*quarters.length));
+    const tgtPts   = Array.from({length:cnt},(_,i)=>[px(i),py(target[i])]);
+    const actPts   = Array.from({length:cnt},(_,i)=>[px(i),py(actual[i])]);
 
-    drawLine(revPts,  C.accent,  false);
-    drawLine(profPts, C.accent4, true);
+    drawLine(tgtPts,  C.accent,  false);
+    drawLine(actPts,  C.accent4, true);
 
     // animated dots on last point
-    const rPulse = 3 + Math.sin(dotT)*1.2;
-    const pPulse = 3 + Math.sin(dotT+1)*1.2;
-    if (revPts.length) {
-      const [rx,ry]=revPts[revPts.length-1];
-      ctx.beginPath(); ctx.arc(rx,ry,rPulse,0,Math.PI*2);
+    const tPulse = 3 + Math.sin(dotT)*1.2;
+    const aPulse = 3 + Math.sin(dotT+1)*1.2;
+    if (tgtPts.length) {
+      const [rx,ry]=tgtPts[tgtPts.length-1];
+      ctx.beginPath(); ctx.arc(rx,ry,tPulse,0,Math.PI*2);
       ctx.fillStyle=C.accent; ctx.fill();
-      ctx.beginPath(); ctx.arc(rx,ry,rPulse+3,0,Math.PI*2);
+      ctx.beginPath(); ctx.arc(rx,ry,tPulse+3,0,Math.PI*2);
       ctx.strokeStyle=hexToRgba(C.accent,0.3); ctx.lineWidth=1.5; ctx.stroke();
     }
-    if (profPts.length) {
-      const [px2,py2]=profPts[profPts.length-1];
-      ctx.beginPath(); ctx.arc(px2,py2,pPulse,0,Math.PI*2);
+    if (actPts.length) {
+      const [qx,qy]=actPts[actPts.length-1];
+      ctx.beginPath(); ctx.arc(qx,qy,aPulse,0,Math.PI*2);
       ctx.fillStyle=C.accent4; ctx.fill();
     }
 
-    // labels
-    ctx.fillStyle=C.muted; ctx.font='7.5px system-ui'; ctx.textAlign='center';
-    weeks.forEach((w,i) => { if(i%2===0) ctx.fillText(w,px(i),H-4); });
+    // emoji goal markers — placed just above the target dot for that quarter
+    goals.forEach(g => {
+      if (g.qIdx < cnt) {
+        const [gx, gy] = [px(g.qIdx), py(target[g.qIdx])];
+        drawEmoji(gx, gy - 12, g.emoji);
+      }
+    });
+
+    // x labels (Q1..Q6)
+    ctx.fillStyle=C.muted; ctx.font='8px system-ui'; ctx.textAlign='center';
+    quarters.forEach((q,i) => ctx.fillText(q, px(i), H - 4));
 
     // legend
     ctx.fillStyle=C.accent; ctx.fillRect(PAD.l,5,12,3);
     ctx.fillStyle=C.muted;  ctx.font='8px system-ui'; ctx.textAlign='left';
-    ctx.fillText('Revenue',PAD.l+15,13);
+    ctx.fillText('Target', PAD.l+15, 13);
     ctx.strokeStyle=C.accent4; ctx.lineWidth=2; ctx.setLineDash([4,3]);
-    ctx.beginPath(); ctx.moveTo(PAD.l+65,7); ctx.lineTo(PAD.l+77,7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(PAD.l+55,7); ctx.lineTo(PAD.l+67,7); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle=C.muted; ctx.fillText('Profit',PAD.l+80,13);
+    ctx.fillStyle=C.muted; ctx.fillText('Actual', PAD.l+70, 13);
   }
 
   animateDraw(1100, p => draw(p), () => {
@@ -1085,7 +1212,15 @@ function animateDraw(duration, onFrame, onDone) {
 
 
 /* ════════════════════════════════════════════════════════════════════
-   FACE 6 – RADAR CHART
+   FACE 6 – RADAR CHART (FINANCIAL HEALTH SCORE)
+   Six dimensions scored out of 100.
+     Savings    58  (low — ₹8.4L debt carried)
+     Income     88  (steady ₹1.5L/mo)
+     Invest     82  (₹12L portfolio built)
+     Debt       46  (₹8.4L outstanding)
+     Spending   62  (spending slightly above income)
+     Emergency  54  (low cash buffer)
+   Average ≈ 65 (mid-range; reflects the ₹8.4L debt on the Sankey)
 ════════════════════════════════════════════════════════════════════ */
 (function RadarChart() {
   const canvas = document.getElementById('radar-canvas');
@@ -1093,7 +1228,7 @@ function animateDraw(duration, onFrame, onDone) {
   const W = canvas.width, H = canvas.height;
 
   const labels = ['Savings','Income','Invest','Debt','Spending','Emergency'];
-  const scores = [82, 91, 68, 74, 58, 88];
+  const scores = [58, 88, 82, 46, 62, 54];
   const cx = W/2, cy = H/2 + 4;
   const maxR = Math.min(W,H)*0.33;
   const N = labels.length;
@@ -1159,7 +1294,7 @@ function animateDraw(duration, onFrame, onDone) {
 
     // labels
     for (let i=0;i<N;i++) {
-      const [x,y] = point(i, maxR+16);
+      const [x,y]=point(i, maxR+16);
       ctx.fillStyle = C.text;
       ctx.font = '8.5px system-ui';
       ctx.textAlign = 'center';
@@ -1194,7 +1329,7 @@ window.setSankeyImage = function(url) {
   const img = document.createElement('img');
   img.src = url;
   img.alt = 'Sankey Diagram';
-  img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:10px;';
+  img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
   wrap.insertBefore(img, wrap.firstChild);
 };
 </script>
