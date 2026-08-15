@@ -1,10 +1,7 @@
 {
   "name": "money360-site-fixed",
   "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dhurianii/M360-Web.git"
@@ -16,8 +13,5 @@
     "url": "https://github.com/dhurianii/M360-Web/issues"
   },
   "homepage": "https://github.com/dhurianii/M360-Web#readme",
-  "description": "",
-  "dependencies": {
-    "chrome-remote-interface": "^0.34.0"
-  }
+  "description": ""
 }

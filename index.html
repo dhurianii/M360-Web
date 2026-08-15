@@ -436,14 +436,11 @@
         <!-- slide viewport: full-bleed, fills the entire hero area -->
         <div id="slideViewport" class="relative w-full h-full overflow-hidden bg-[#0b1426]">
 
-<!-- Slide 1: Moneylizer logo animation.
-               Same lazy-load pattern as slide 4's cube: the iframe has
-               data-src but no src, so assets/logo-animation.html is NOT
-               fetched eagerly. The carousel's first visit triggers the
-               mount via startLogoIframe(); warmupLogo() prefetches the
-               bundle after window.load (and again on each idle frame after
-               the carousel completes a full loop, so returning visitors
-               don't wait). -->
+<!-- Slide 1: Moneylizer intro video (assets/first-slide.mp4).
+               The <video> element is loaded eagerly so it starts as soon as
+               the carousel lands on slide 1. The video itself owns the
+               timeline — when it 'ended' fires, the carousel advances to
+               slide 2. -->
           <div class="hero-slide absolute inset-0" data-slide="0" data-duration="video"
             style="background:#ffffff;">
             <video id="firstSlideVideo" class="w-full h-full object-cover" muted playsinline preload="auto"
@@ -494,16 +491,17 @@
           </div>
 
 <!-- Slide 4: 3D Financial Cube Animation.
-               The cube is a self-contained page (assets/financial-cube.html)
-               built from the standalone 3d-financial-cube-animation prototype.
-               We mount it as an iframe so the heavy Three.js bundle is loaded
-               only when this slide becomes visible, and stays isolated from
-               the rest of the hero page. The cube URL lives in data-src so the
-               iframe is NOT fetched eagerly on page load — first paint stays
-               light. JS (startCubeIframe) copies data-src into src only when
-               the carousel lands on slide 4, and a one-time <link rel=prefetch>
-               (added in the warm-up hook below) speculatively fetches the
-               bundle after window.load so it's ready when slide 4 shows. -->
+               The cube is a self-contained page (assets/lightweight-cube.html)
+               — a CSS-3D cube with canvas-rendered charts on each face. We
+               mount it as an iframe so the bundle is loaded only when this
+               slide becomes visible, and stays isolated from the rest of
+               the hero page. The cube URL lives in data-src so the iframe
+               is NOT fetched eagerly on page load — first paint stays
+               light. JS (startCubeIframe) copies data-src into src only
+               when the carousel lands on slide 4, and a one-time
+               <link rel=prefetch> (added in the warm-up hook below)
+               speculatively fetches the bundle after window.load so it's
+               ready when slide 4 shows. -->
           <div class="hero-slide absolute inset-0" data-slide="3" data-duration="12000" style="background:#ffffff;">
             <div class="absolute inset-0">
               <iframe
@@ -684,14 +682,14 @@
 
       // ---- slide 4: 3D Financial Cube (LAZY iframe).
       // The iframe has data-src but no src, so the browser does NOT fetch
-      // assets/financial-cube.html on page load — first paint stays light.
+      // assets/lightweight-cube.html on page load — first paint stays light.
       // startCubeIframe() copies data-src into src on the FIRST visit to
-      // slide 4 and NEVER re-loads. The 1.17 MB Three.js bundle is heavy
-      // to re-download on every carousel loop, and the entrance animation
-      // doesn't carry the slide — the auto-rotate inside the cube is the
-      // "alive" signal. After window.load fires we also drop in a
-      // <link rel=prefetch> so the cube downloads in the idle window before
-      // the carousel naturally reaches slide 4. ----
+      // slide 4 and NEVER re-loads. The cube bundle is heavy enough that
+      // re-downloading on every carousel loop would be wasteful, and the
+      // entrance animation doesn't carry the slide — the auto-rotate
+      // inside the cube is the "alive" signal. After window.load fires we
+      // also drop in a <link rel=prefetch> so the cube downloads in the
+      // idle window before the carousel naturally reaches slide 4. ----
       const cubeFrame  = document.getElementById('cubeFrame');
       const CUBE_URL   = 'assets/lightweight-cube.html';
 
