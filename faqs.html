@@ -17,54 +17,59 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="assets/responsive.css">
+<style>
+  /* FAQs iframe shell — same pattern as the legal pages.
+     - Full-width responsive container mirroring the rest of the site.
+     - The iframe owns its own typography + accordion styles (inlined inside
+       assets/faqs-content.html) so the rest of the page stays untouched.
+     - On mobile we keep the same height but tighten side padding. */
+  .faqs-shell {
+    width: 100%;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+    box-sizing: border-box;
+  }
+  @media (min-width: 640px) {
+    .faqs-shell { padding: 40px 32px 80px; }
+  }
+  @media (min-width: 768px) {
+    .faqs-shell { padding: 48px 40px 96px; }
+  }
+  .faqs-frame-wrap {
+    width: 100%;
+    max-width: 100%;
+    background: #ffffff;
+    border: 1px solid #e7ecf3;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px -16px rgba(15, 23, 42, 0.10);
+  }
+  .faqs-frame {
+    display: block;
+    width: 100%;
+    height: 3200px;          /* generous enough for the 49-FAQ list */
+    border: 0;
+    background: #ffffff;
+  }
+  @media (max-width: 639.98px) {
+    .faqs-frame { height: 4000px; } /* mobile gets extra headroom */
+  }
+</style>
 </head>
 <body class="text-slate-900 antialiased">
 <div class="ambient" aria-hidden="true"><div class="blue"></div><div class="green"></div></div>
 
 <div id="site-header"></div>
 
-<main class="max-w-[760px] mx-auto px-5 sm:px-8 page-hero">
-  <div class="fade-up">
-    <div class="eyebrow">FAQs</div>
-    <h1 class="display-title text-[32px] sm:text-[42px] font-[500] tracking-[-0.02em] mt-2">Common <span class="money-grad">questions</span></h1>
-  </div>
-  <div class="fade-up d1 mt-10">
-    
-    <div class="faq-item">
-      <button class="faq-q">
-        <span>Is Money360 free to try?</span>
-        <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><p>Yes — click TRY DEMO from any page to explore the live intelligence engine with sample data, no signup required.</p></div>
-    </div>
-    <div class="faq-item">
-      <button class="faq-q">
-        <span>How is my financial data secured?</span>
-        <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><p>All data is encrypted at rest and in transit, and model access is scoped per client environment. See our <a href="privacy.html" class="footer-link">Privacy Policy</a> for details.</p></div>
-    </div>
-    <div class="faq-item">
-      <button class="faq-q">
-        <span>Which data sources does Money360 support?</span>
-        <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><p>Bank statements, market feeds, filings and most common accounting exports. Custom integrations are available on request.</p></div>
-    </div>
-    <div class="faq-item">
-      <button class="faq-q">
-        <span>Can I cancel anytime?</span>
-        <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><p>Yes, plans are month to month with no lock-in. Contact our team via the phone icon in the navigation bar.</p></div>
-    </div>
-    <div class="faq-item">
-      <button class="faq-q">
-        <span>Do you offer support for enterprise teams?</span>
-        <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><p>Yes — enterprise plans include a dedicated onboarding specialist and priority support.</p></div>
-    </div>
+<main class="faqs-shell fade-up">
+  <div class="faqs-frame-wrap">
+    <iframe
+      class="faqs-frame"
+      src="assets/faqs-content.html"
+      title="Money360 FAQs"
+      loading="lazy"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen></iframe>
   </div>
 </main>
 

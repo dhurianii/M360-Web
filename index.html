@@ -320,28 +320,21 @@
         display: flex !important;
       }
 
-      /* Slide 1 — logo animation: iframe fills the slide edge-to-edge,
-         no cropping; the inner HTML handles its own layout + centering. */
+      /* Slide 1 — first-slide video: contain, no crop, centered */
       .hero-slide[data-slide="0"] {
         background: #FFFFFF !important;
       }
-      .hero-slide[data-slide="0"] > div.absolute.inset-0 {
-        position: absolute !important;
-        inset: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        box-sizing: border-box !important;
-        overflow: hidden !important;
+      .hero-slide[data-slide="0"] video {
+        position: relative !important;
+        width: auto !important;
+        height: auto !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        object-fit: contain !important;
       }
-      .hero-slide[data-slide="0"] #logoFrame {
-        position: absolute !important;
-        inset: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        border: 0 !important;
-        display: block !important;
+      /* Hide the dark gradient overlay on mobile — no longer needed with white bg */
+      .hero-slide[data-slide="0"] > div.absolute.inset-0[style*="linear-gradient"] {
+        display: none !important;
       }
 
       /* Slide 2 — hero video: contain, no crop, centered */
@@ -451,17 +444,12 @@
                bundle after window.load (and again on each idle frame after
                the carousel completes a full loop, so returning visitors
                don't wait). -->
-          <div class="hero-slide absolute inset-0 overflow-hidden" data-slide="0" data-duration="5000"
-            style="background: linear-gradient(135deg,#f1f2f4,#f5f6f8);">
-            <div class="absolute inset-0">
-              <iframe
-                id="logoFrame"
-                data-src="assets/logo-animation.html"
-                title="Moneylizer logo animation"
-                loading="lazy"
-                style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#f1f2f4;display:block;"
-              ></iframe>
-            </div>
+          <div class="hero-slide absolute inset-0" data-slide="0" data-duration="video"
+            style="background:#ffffff;">
+            <video id="firstSlideVideo" class="w-full h-full object-cover" muted playsinline preload="auto"
+              src="assets/first-slide.mp4"></video>
+            <div class="absolute inset-0"
+              style="background: linear-gradient(to top, rgba(7,18,36,0.4) 0%, transparent 55%);"></div>
           </div>
 
           <!-- Slide 2: Product Demo (video) -->
@@ -557,6 +545,7 @@
       const dots = document.querySelectorAll('.hero-dot');
       const viewport = document.getElementById('slideViewport');
       const video = document.getElementById('demoVideo');
+      const firstSlideVideo = document.getElementById('firstSlideVideo');
       const playToggle = document.getElementById('playToggle');
       const pauseIcon = document.getElementById('pauseIcon');
       const playIcon = document.getElementById('playIcon');
@@ -623,6 +612,19 @@
           d.classList.toggle('bg-slate-300', idx !== active);
         });
 
+        // Slide 1: first-slide video owns the timeline
+        if (active === 0) {
+          try { firstSlideVideo.currentTime = 0; } catch (e) { /* metadata may not be ready yet */ }
+          const fsPlay = firstSlideVideo.play();
+          if (fsPlay && typeof fsPlay.catch === 'function') {
+            fsPlay.catch(() => { /* autoplay can be blocked until user interaction */ });
+          }
+        } else {
+          // Leaving slide 1: stop/reset the video
+          firstSlideVideo.pause();
+          try { firstSlideVideo.currentTime = 0; } catch (e) { /* ignore */ }
+        }
+
         // Slide 2: video owns the timeline
         if (active === 1) {
           try { video.currentTime = 0; } catch (e) { /* metadata may not be ready yet */ }
@@ -636,12 +638,7 @@
           try { video.currentTime = 0; } catch (e) { /* ignore */ }
         }
 
-        // Slide 1: Moneylizer logo animation (lazy iframe).
-        // First visit mounts it; subsequent visits cache-bust so the
-        // letter-by-letter reveal replays.
-        if (active === 0) {
-          startLogoIframe();
-        }
+        // (Slide 1 video handles its own entrance — no iframe to mount.)
 
         // Slide 3: mount the supported-sources iframe on first visit.
         if (active === 2) {
@@ -674,6 +671,11 @@
       video.addEventListener('ended', () => {
         // Video finished — advance to slide 3
         if (active === 1) goTo(2);
+      });
+
+      // Slide 1 video owns its timeline too — advance to slide 2 when it ends
+      firstSlideVideo.addEventListener('ended', () => {
+        if (active === 0) goTo(1);
       });
 
       // ---- hover pause/resume ----
@@ -716,15 +718,6 @@
         } catch (e) { /* ignore */ }
       }
 
-      // ---- slide 1: Moneylizer logo animation (LAZY iframe). ----
-      const logoFrame  = document.getElementById('logoFrame');
-      const LOGO_URL   = 'assets/logo-animation.html';
-
-      function startLogoIframe() {
-        if (!logoFrame || logoFrame.src) return;
-        logoFrame.src = LOGO_URL;
-      }
-
       // ---- slide 3: Supported Statement Sources (LAZY iframe). ----
       const sourcesFrame = document.getElementById('sourcesFrame');
 
@@ -736,11 +729,10 @@
       // ---- init ----
       slides.forEach(s => { s.style.transition = 'opacity .5s ease'; });
       goTo(0);
-      // Both iframes are lazy — page load stays fast. After window.load
-      // we speculatively prefetch the two bundles so they're cached before
-      // the carousel naturally reaches slide 4 (cube) and on every
-      // subsequent loop back to slide 1 (logo).
-      function warmup() { prefetch(LOGO_URL); prefetch(SOURCES_URL); prefetch(CUBE_URL); }
+      // The remaining iframe (sources) is lazy — page load stays fast.
+      // After window.load we speculatively prefetch its bundle so it's
+      // cached before the carousel naturally reaches slide 3.
+      function warmup() { prefetch(SOURCES_URL); prefetch(CUBE_URL); }
       if (document.readyState === 'complete') warmup();
       else window.addEventListener('load', warmup, { once: true });
     })();

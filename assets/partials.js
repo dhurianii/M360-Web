@@ -52,7 +52,7 @@
   <div class="max-w-[1200px] mx-auto px-5 sm:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[12.5px]">
     <div class="text-slate-500 font-[475] tracking-[-0.006em] text-center sm:text-left">
       <span class="text-slate-800 font-[600]">&copy; 2026 Moneylizer</span>
-      <span class="text-slate-400">(MegaGraphs Tech Pvt Ltd)</span>
+      <span class="text-slate-400">(Megagraphs Tech Pvt Ltd)</span>
     </div>
     <div class="flex items-center gap-5 text-slate-500">
       <a href="privacy.html" class="footer-link">Privacy Policy</a>

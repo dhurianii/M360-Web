@@ -130,16 +130,6 @@
       line-height: 1.3;
     }
 
-    /* Empty-state placeholder — used by Mutual Funds until we have partners. */
-    .inst-col-placeholder {
-      font-size: clamp(11.5px, 1vw, 13.5px);
-      font-weight: 500;
-      color: #94a3b8;
-      font-style: italic;
-      letter-spacing: -0.005em;
-      line-height: 1.4;
-    }
-
     /* ----------------------------------------------------------------
        TABLET (≤ 980px) — 2x2 grid so the cells stay readable.
        ---------------------------------------------------------------- */
@@ -148,15 +138,53 @@
     }
 
     /* ----------------------------------------------------------------
-       MOBILE (≤ 640px) — single column, comfortable card stack.
+       MOBILE (≤ 640px) — single column, scrollable card stack.
+       - Page no longer clips content: body + page wrapper become
+         scrollable so all 4 cards fit on small screens without
+         cropping.
+       - Headline shrinks but stays visible; subtitle is hidden to
+         give the list more room.
+       - Cards get generous tap targets (44px+ item height).
        ---------------------------------------------------------------- */
     @media (max-width: 640px) {
-      .instruments { padding: 12px 12px; gap: 10px; }
-      .instruments-head h2 { font-size: 18px; line-height: 1.15; }
+      html, body { overflow: auto; }
+      .instruments {
+        padding: 14px 14px 18px;
+        gap: 10px;
+        overflow: visible;
+        min-height: 100%;
+      }
+      .instruments-head { text-align: left; }
+      .instruments-head h2 { font-size: 19px; line-height: 1.2; }
       .instruments-head p { display: none; }
-      .instruments-grid { grid-template-columns: 1fr; gap: 10px; }
-      .inst-col { padding: 14px 16px; gap: 10px; border-radius: 12px; }
-      .inst-col-list li { font-size: 13px; }
+
+      .instruments-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        flex: none;
+      }
+
+      .inst-col {
+        padding: 12px 14px;
+        gap: 8px;
+        border-radius: 12px;
+      }
+      .inst-col-title { font-size: 14px; }
+      .inst-col-list { gap: 7px; }
+      .inst-col-list li {
+        font-size: 13.5px;
+        line-height: 1.35;
+        padding: 2px 0;            /* bigger tap target on touch */
+      }
+    }
+
+    /* Extra-small phones (≤ 380px) — tighten further so a 360px-wide
+       device doesn't truncate longer names like "IDFC First". */
+    @media (max-width: 380px) {
+      .instruments { padding: 12px 12px 16px; }
+      .instruments-head h2 { font-size: 17px; }
+      .inst-col { padding: 10px 12px; }
+      .inst-col-list li { font-size: 12.5px; }
     }
 
     /* Respect reduced motion */
@@ -213,11 +241,14 @@
         </ul>
       </section>
 
-      <!-- 4. Mutual Funds — Coming Soon placeholder. -->
+      <!-- 4. Mutual Funds — CAS statement via MF Central + Kuvera. -->
       <section class="inst-col" aria-labelledby="cat-mf">
         <h3 id="cat-mf" class="inst-col-title">Mutual Funds</h3>
         <div class="inst-col-rule" aria-hidden="true"></div>
-        <div class="inst-col-placeholder">Coming Soon</div>
+        <ul class="inst-col-list">
+          <li>MF Central</li>
+          <li>Kuvera</li>
+        </ul>
       </section>
 
     </div>
