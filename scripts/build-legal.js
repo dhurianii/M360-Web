@@ -49,7 +49,7 @@ const SOURCES = [
 ];
 
 // Output goes here. The Moneylizer legal pages iframe in these files.
-const OUT_DIR = path.resolve(__dirname);
+const OUT_DIR = path.resolve(__dirname, '..', 'assets', 'content');
 const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
   '(KHTML, like Gecko) Chrome/120.0 Safari/537.36 Moneylizer-BuildLegal/1.0';

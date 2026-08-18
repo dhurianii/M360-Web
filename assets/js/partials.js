@@ -6,7 +6,6 @@
 (function () {
   // Map filename -> page key used by data-page attributes in the header
   const pageMap = {
-    'about.html': 'about',
     'rnd.html': 'rnd',
     'blogs.html': 'blogs',
     'faqs.html': 'faqs',
@@ -24,11 +23,10 @@
 <header class="site-nav">
   <div class="max-w-[1200px] mx-auto px-5 sm:px-8 h-[68px] flex items-center justify-between gap-4">
     <a href="index.html" class="flex items-center gap-2.5 shrink-0 min-w-0">
-      <img src="assets/logo.png" alt="Money360" class="site-logo shrink-0">
+      <img src="assets/images/logo.png" alt="Money360" class="site-logo shrink-0">
     </a>
     <div class="hidden md:flex items-center gap-8 shrink-0">
       <nav class="flex items-center gap-8" id="primaryNav">
-        <a href="about.html" data-page="about" class="nav-link">About</a>
         <a href="faqs.html" data-page="faqs" class="nav-link">FAQs</a>
       </nav>
       <a href="https://megagraphs.com/try-m360/" class="try-demo-btn">TRY M360</a>
@@ -40,7 +38,6 @@
     </button>
   </div>
   <div id="mobileNavMenu" class="hidden md:hidden px-5 pb-4 border-t border-slate-100">
-    <a href="about.html" data-page="about" class="mobile-nav-link block py-2.5 text-[15px] font-medium text-slate-600">About</a>
     <a href="faqs.html" data-page="faqs" class="mobile-nav-link block py-2.5 text-[15px] font-medium text-slate-600">FAQs</a>
     <a href="https://megagraphs.com/try-m360/" class="try-demo-btn inline-block mt-2">TRY M360 </a>
   </div>

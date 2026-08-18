@@ -1,7 +1,9 @@
 {
   "name": "money360-site-fixed",
   "version": "1.0.0",
-  "scripts": {},
+  "scripts": {
+    "build:legal": "node scripts/build-legal.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dhurianii/M360-Web.git"
