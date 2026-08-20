@@ -47,12 +47,13 @@
   .faqs-frame {
     display: block;
     width: 100%;
-    height: 3200px;          /* generous enough for the 49-FAQ list */
+    height: 80vh;            /* fit-to-viewport; external page handles its own scroll */
+    min-height: 3200px;
     border: 0;
     background: #ffffff;
   }
   @media (max-width: 639.98px) {
-    .faqs-frame { height: 4000px; } /* mobile gets extra headroom */
+    .faqs-frame { height: 80vh; min-height: 4000px; } /* mobile keeps headroom */
   }
 </style>
 </head>
@@ -66,7 +67,7 @@
     <iframe
       class="faqs-frame"
       src="assets/content/faqs.html"
-      title="Money360 FAQs"
+      title="Moneylizer FAQs"
       loading="lazy"
       referrerpolicy="strict-origin-when-cross-origin"
       allowfullscreen></iframe>

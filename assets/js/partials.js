@@ -23,7 +23,7 @@
 <header class="site-nav">
   <div class="max-w-[1200px] mx-auto px-5 sm:px-8 h-[68px] flex items-center justify-between gap-4">
     <a href="index.html" class="flex items-center gap-2.5 shrink-0 min-w-0">
-      <img src="assets/images/logo.png" alt="Money360" class="site-logo shrink-0">
+      <img src="assets/images/logo.webp" alt="Moneylizer" class="site-logo shrink-0">
     </a>
     <div class="hidden md:flex items-center gap-8 shrink-0">
       <nav class="flex items-center gap-8" id="primaryNav">
