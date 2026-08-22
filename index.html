@@ -210,6 +210,42 @@
     }
 
     /* ---------------------------------------------------------------------
+       Slide 1 — Product demo video with native controls.
+       Wrapped in a stable aspect-ratio container (16/7 ≈ 2.286) so the
+       layout is consistent across Chrome, Edge and other desktop browsers
+       regardless of viewport height. The video is letterboxed inside the
+       frame with object-fit: contain, preserving the demo's native
+       1280:544 aspect ratio (~2.35:1) without cropping or stretching.
+       Container height is capped at the original 100vh-68px hero size so
+       on tall displays the layout stays the same.
+    --------------------------------------------------------------------- */
+    .hero-slide[data-slide="0"] {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .video-frame {
+      position: relative;
+      width: 100%;
+      max-width: 1280px;
+      aspect-ratio: 16 / 7;             /* stable shape, browser-agnostic */
+      max-height: calc(100vh - 68px);   /* never taller than the old hero */
+      background: #000000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px -20px rgba(15, 23, 42, 0.35);
+    }
+    .video-frame video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;              /* keep native ratio, no crop/stretch */
+      background: #000000;
+      display: block;
+    }
+
+    /* ---------------------------------------------------------------------
        MOBILE FULLSCREEN PRESENTATION (below 768px)
        - Page fits 100vh: fixed header, hero fills the middle, fixed footer
        - No vertical scroll, no horizontal overflow
@@ -320,16 +356,27 @@
         display: flex !important;
       }
 
-      /* Slide 1 — first-slide video: contain, no crop, centered */
+      /* Slide 1 — demo video (now user-controlled via native controls).
+         The .video-frame wrapper keeps the 16:7 aspect ratio on mobile
+         and the inner <video> uses object-fit: contain so the demo is
+         never cropped or stretched. */
       .hero-slide[data-slide="0"] {
         background: #FFFFFF !important;
       }
-      .hero-slide[data-slide="0"] video {
+      .hero-slide[data-slide="0"] .video-frame {
         position: relative !important;
-        width: auto !important;
-        height: auto !important;
+        width: 100% !important;
         max-width: 100% !important;
         max-height: 100% !important;
+        margin: 0 auto !important;
+        aspect-ratio: 16 / 7 !important;
+        border-radius: 8px !important;
+      }
+      .hero-slide[data-slide="0"] .video-frame video {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
         object-fit: contain !important;
       }
       /* Hide the dark gradient overlay on mobile — no longer needed with white bg */
@@ -430,23 +477,24 @@
 
   <main>
 
-    <section id="demo" class="relative w-full h-[calc(100vh-68px)] overflow-hidden bg-[#0b1426]">
+    <section id="demo" class="relative w-full h-[calc(100vh-68px)] min-h-[480px] overflow-hidden bg-[#0b1426]">
       <div class="fade-up d2 absolute inset-0">
 
         <!-- slide viewport: full-bleed, fills the entire hero area -->
         <div id="slideViewport" class="relative w-full h-full overflow-hidden bg-[#0b1426]">
 
-<!-- Slide 1: Moneylizer intro video (assets/first-slide.mp4).
-               The <video> element is loaded eagerly so it starts as soon as
-               the carousel lands on slide 1. The video itself owns the
-               timeline — when it 'ended' fires, the carousel advances to
-               slide 2. -->
-          <div class="hero-slide absolute inset-0" data-slide="0" data-duration="video"
+<!-- Slide 1: Product demo (assets/video/demo.mp4) — same video as slide 2.
+               Native browser video controls (play/pause, seek, volume, fullscreen)
+               so the user can interact with the demo directly. The video is
+               wrapped in a responsive aspect-ratio container so it scales
+               consistently without cropping or stretching. Video is paused
+               by default; user presses play. -->
+          <div class="hero-slide absolute inset-0" data-slide="0" data-duration="9000"
             style="background:#ffffff;">
-            <video id="firstSlideVideo" class="w-full h-full object-cover" muted playsinline preload="auto"
-              src="assets/video/first-slide.mp4"></video>
-            <div class="absolute inset-0"
-              style="background: linear-gradient(to top, rgba(7,18,36,0.4) 0%, transparent 55%);"></div>
+            <div class="video-frame">
+              <video id="firstSlideVideo" controls playsinline preload="metadata"
+                src="assets/video/Demo (4).mp4"></video>
+            </div>
           </div>
 
           <!-- Slide 2: Product Demo (video) -->
@@ -532,9 +580,10 @@
   <script>
     // ---------------------------------------------------------------------------
     // Hero carousel controller
-    // - Slides 1, 3, 4: fixed 5s dwell
+    // - Slide 1: fixed 9s dwell; video is user-controlled (native controls)
     // - Slide 2: dwell = duration of the video (pauses carousel until 'ended')
-    // - Slide 4: internal tab switching does NOT advance the carousel
+    // - Slide 3: fixed 9s dwell
+    // - Slide 4: fixed 12s dwell (cube is the whole show)
     // - Manual dot click resets the timer for the destination slide
     // - Mouse hover pauses the auto-advance; leave resumes it
     // ---------------------------------------------------------------------------
@@ -610,13 +659,12 @@
           d.classList.toggle('bg-slate-300', idx !== active);
         });
 
-        // Slide 1: first-slide video owns the timeline
+        // Slide 1: demo video is user-controlled via native controls.
+        // Don't autoplay — reset the video so the user sees frame 0 ready
+        // to play, but leave it paused.
         if (active === 0) {
-          try { firstSlideVideo.currentTime = 0; } catch (e) { /* metadata may not be ready yet */ }
-          const fsPlay = firstSlideVideo.play();
-          if (fsPlay && typeof fsPlay.catch === 'function') {
-            fsPlay.catch(() => { /* autoplay can be blocked until user interaction */ });
-          }
+          firstSlideVideo.pause();
+          try { firstSlideVideo.currentTime = 0; } catch (e) { /* ignore */ }
         } else {
           // Leaving slide 1: stop/reset the video
           firstSlideVideo.pause();
@@ -669,11 +717,6 @@
       video.addEventListener('ended', () => {
         // Video finished — advance to slide 3
         if (active === 1) goTo(2);
-      });
-
-      // Slide 1 video owns its timeline too — advance to slide 2 when it ends
-      firstSlideVideo.addEventListener('ended', () => {
-        if (active === 0) goTo(1);
       });
 
       // ---- hover pause/resume ----
