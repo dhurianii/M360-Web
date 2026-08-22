@@ -148,11 +148,11 @@
     }
 
     /* ---------------------------------------------------------------------
-       Slide 3 — Supported Statement Sources (4-row category panel).
-       The whole slide is rendered inside assets/slide3-sources.html and
-       mounted as an iframe so the rest of the page stays untouched. The
-       iframe fills the slide edge-to-edge; the inner page owns its own
-       typography, colour and layout.
+       Slide 3 (no longer used): previously, the Supported Statement
+       Sources page was rendered inside assets/slide3-sources.html and
+       mounted as an iframe. The slide layout is now a split-screen
+       cube + scrolling credits; this rule is kept only as a defensive
+       fallback in case a stale iframe is rendered.
     --------------------------------------------------------------------- */
     .sources-iframe {
       position: absolute;
@@ -211,38 +211,199 @@
 
     /* ---------------------------------------------------------------------
        Slide 1 — Product demo video with native controls.
-       Wrapped in a stable aspect-ratio container (16/7 ≈ 2.286) so the
-       layout is consistent across Chrome, Edge and other desktop browsers
-       regardless of viewport height. The video is letterboxed inside the
-       frame with object-fit: contain, preserving the demo's native
-       1280:544 aspect ratio (~2.35:1) without cropping or stretching.
-       Container height is capped at the original 100vh-68px hero size so
-       on tall displays the layout stays the same.
+       The <video> IS the slide content — no card, no border, no padding,
+       no shadow, no background. It fills the slide edge-to-edge
+       (width: 100%, height: 100%) and uses object-fit: contain so the
+       demo's native 1280:544 aspect ratio (~2.35:1) is preserved
+       without cropping or stretching. The slide itself has no
+       background, so the area not covered by the video (letterbox)
+       shows the page background.
     --------------------------------------------------------------------- */
     .hero-slide[data-slide="0"] {
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
+      background: transparent !important;
+      display: block !important;
     }
-    .video-frame {
-      position: relative;
-      width: 100%;
-      max-width: 1280px;
-      aspect-ratio: 16 / 7;             /* stable shape, browser-agnostic */
-      max-height: calc(100vh - 68px);   /* never taller than the old hero */
-      background: #000000;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 24px 60px -20px rgba(15, 23, 42, 0.35);
-    }
-    .video-frame video {
+    .hero-slide[data-slide="0"] .slide-video,
+    .hero-slide[data-slide="0"] > video {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
+      max-width: none;
+      max-height: none;
       object-fit: contain;              /* keep native ratio, no crop/stretch */
-      background: #000000;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 0;
+      margin: 0;
       display: block;
+    }
+
+    /* ---------------------------------------------------------------------
+       Hero carousel navigation arrows.
+       Subtle, minimal pills pinned to the left/right edges of the slide
+       viewport. The default state is intentionally understated (low
+       opacity, small footprint) so the arrows feel like a hint rather
+       than a featured control. Hover/focus bumps the opacity so the
+       affordance becomes obvious. The arrows are children of #demo so
+       they overlay every slide.
+    --------------------------------------------------------------------- */
+    .hero-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 20;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0f172a;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      border-radius: 9999px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      cursor: pointer;
+      opacity: 0.55;
+      transition: opacity .15s ease, background .15s ease, transform .15s ease, border-color .15s ease;
+      box-shadow: none;
+    }
+    .hero-arrow:hover,
+    .hero-arrow:focus-visible {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(15, 23, 42, 0.12);
+      outline: none;
+    }
+    .hero-arrow:active {
+      transform: translateY(-50%) scale(0.94);
+    }
+    .hero-arrow-prev { left: 14px; }
+    .hero-arrow-next { right: 14px; }
+
+    /* ---------------------------------------------------------------------
+       Slide 3 — split-screen: 3D cube on the left (~65%), vertically
+       scrolling "end credits" of supported financial instruments on the
+       right (~35%). A thin vertical divider sits between them. On mobile
+       (rules in the @media block below) the panes stack vertically and
+       the credits area is a fixed-height ticker so names never spill.
+    --------------------------------------------------------------------- */
+    .slide3-split {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: row;
+      background: #ffffff;
+      overflow: hidden;
+    }
+    .slide3-pane {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .slide3-cube {
+      flex: 0 0 65%;
+      max-width: 65%;
+      border-right: 1px solid #e7ecf3;
+    }
+    .slide3-cube iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #ffffff;
+      display: block;
+    }
+    .slide3-credits {
+      flex: 0 0 35%;
+      max-width: 35%;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      background: #ffffff;
+    }
+    .slide3-credits-viewport {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+      /* Soft top + bottom fades so the credits fade in/out at the edges,
+         matching the end-credits feel. */
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 8%, #000 92%, transparent 100%);
+              mask-image: linear-gradient(to bottom, transparent 0, #000 8%, #000 92%, transparent 100%);
+    }
+    .slide3-credits-track {
+      display: flex;
+      flex-direction: column;
+      padding: 6vh 28px 6vh 28px;
+      animation: slide3-credits-scroll 38s linear infinite;
+      will-change: transform;
+    }
+    .slide3-credits-track:hover {
+      animation-play-state: paused;
+    }
+    .slide3-credits-heading {
+      font-family: 'Fraunces', 'Inter', serif;
+      font-weight: 500;
+      /* Tightened to fit "Currently Supported Financial Instruments"
+         on a single line within the 35% right pane at typical desktop
+         widths (1024–1440px). white-space: nowrap + overflow visible
+         guarantees no wrapping. */
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #0f172a;
+      text-align: center;
+      margin: 0 auto 28px;
+      max-width: none;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+    .slide3-credits-section {
+      margin: 0 auto 30px;
+      max-width: 28ch;
+      text-align: center;
+    }
+    .slide3-credits-section + .slide3-credits-section {
+      margin-top: 22px;
+    }
+    .slide3-credits-title {
+      font-family: 'Fraunces', 'Inter', serif;
+      font-weight: 500;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #0f172a;
+      margin: 0 0 10px;
+    }
+    .slide3-credits-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .slide3-credits-list li {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 13px;
+      color: #475569;
+      letter-spacing: 0.04em;
+      line-height: 1.85;
+    }
+    .slide3-credits-empty {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: #94a3b8;
+      letter-spacing: 0.08em;
+      font-style: italic;
+    }
+    @keyframes slide3-credits-scroll {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-50%); }
     }
 
     /* ---------------------------------------------------------------------
@@ -356,30 +517,31 @@
         display: flex !important;
       }
 
-      /* Slide 1 — demo video (now user-controlled via native controls).
-         The .video-frame wrapper keeps the 16:7 aspect ratio on mobile
-         and the inner <video> uses object-fit: contain so the demo is
-         never cropped or stretched. */
+      /* Slide 1 — demo video (user-controlled via native controls).
+         Full-bleed on mobile too: no card, no padding, no border, no shadow,
+         no background. Video uses object-fit: contain so the demo is never
+         cropped or stretched. The slide itself has no background — the
+         area not covered by the video shows the page background. */
       .hero-slide[data-slide="0"] {
-        background: #FFFFFF !important;
+        background: transparent !important;
       }
-      .hero-slide[data-slide="0"] .video-frame {
-        position: relative !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
-        margin: 0 auto !important;
-        aspect-ratio: 16 / 7 !important;
-        border-radius: 8px !important;
-      }
-      .hero-slide[data-slide="0"] .video-frame video {
+      .hero-slide[data-slide="0"] .slide-video,
+      .hero-slide[data-slide="0"] > video {
         position: absolute !important;
         inset: 0 !important;
         width: 100% !important;
         height: 100% !important;
+        max-width: none !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
         object-fit: contain !important;
       }
-      /* Hide the dark gradient overlay on mobile — no longer needed with white bg */
+      /* Hide the dark gradient overlay on mobile — no longer needed */
       .hero-slide[data-slide="0"] > div.absolute.inset-0[style*="linear-gradient"] {
         display: none !important;
       }
@@ -401,61 +563,93 @@
         display: none !important;
       }
 
-      /* Slide 3 — supported sources iframe: fills the slide edge-to-edge.
-         The inner page (slide3-sources.html) handles its own padding for
-         small screens via its own @media queries. */
+      /* Slide 3 — mobile-first vertical presentation.
+         Below 768px the desktop 65/35 split is abandoned in favour of a
+         dashboard/news-card stack: large centered cube on top, then a
+         heading, then a fixed-height scrolling ticker of instrument
+         names. Everything stays inside the slide viewport — no
+         horizontal scroll, no overflow outside the slide. */
       .hero-slide[data-slide="2"] {
         background: #FFFFFF !important;
       }
-      .hero-slide[data-slide="2"] > div.absolute.inset-0 {
-        position: absolute !important;
-        inset: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        box-sizing: border-box !important;
+      .slide3-split {
+        flex-direction: column !important;
+        align-items: stretch !important;
         overflow: hidden !important;
       }
-      .hero-slide[data-slide="2"] #sourcesFrame {
-        position: absolute !important;
-        inset: 0 !important;
+      .slide3-pane {
         width: 100% !important;
-        height: 100% !important;
-        border: 0 !important;
-        display: block !important;
-      }
-
-      /* Slide 4 — 3D Financial Cube (iframe): fill the slide edge-to-edge,
-         no padding around it; the cube's own internal canvas handles its
-         own layout. */
-      .hero-slide[data-slide="3"] {
-        background: #FFFFFF !important;
-      }
-      .hero-slide[data-slide="3"] > div.absolute.inset-0 {
-        position: absolute !important;
-        inset: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        box-sizing: border-box !important;
+        max-width: 100% !important;
+        min-height: 0 !important;
         overflow: hidden !important;
       }
-      .hero-slide[data-slide="3"] #cubeFrame {
-        position: absolute !important;
-        inset: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        border: 0 !important;
-        display: block !important;
+      /* Cube: large, centered visual occupying the top ~45% of the slide.
+         Centered with a small horizontal margin so it never touches the
+         viewport edges. The cube's own internal canvas (rendered inside
+         the iframe) handles its own aspect ratio. */
+      .slide3-cube {
+        flex: 0 0 45% !important;
+        max-width: 100% !important;
+        border-right: 0 !important;
+        border-bottom: 1px solid #e7ecf3;
+        padding: 12px !important;
+        box-sizing: border-box !important;
       }
-
-      /* Carousel dots: sit just above the fixed footer */
-      #demo > div.absolute.bottom-5 {
-        bottom: 12px !important;
-        left: 0 !important;
-        right: 0 !important;
+      .slide3-cube iframe {
+        border-radius: 12px !important;
+      }
+      /* Credits: the rest of the slide, with a fixed-height scrolling
+         ticker area. The viewport is the only thing that scrolls;
+         everything outside it is clipped so instrument names never
+         spill or escape the slide. */
+      .slide3-credits {
+        flex: 1 1 auto !important;
+        max-width: 100% !important;
+        min-height: 0 !important;
+        padding: 14px 16px 18px !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      .slide3-credits-heading {
+        /* 1–2 lines max, never 4+ tiny lines. Slightly larger than
+           desktop so it reads as a section title on mobile. */
+        font-size: 13px !important;
+        letter-spacing: 0.1em !important;
+        line-height: 1.25 !important;
+        white-space: normal !important;
+        margin: 0 0 12px !important;
+        max-width: 22ch !important;
+      }
+      .slide3-credits-viewport {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        border-top: 1px solid #e7ecf3;
+        border-bottom: 1px solid #e7ecf3;
+        padding: 0 4px;
+      }
+      .slide3-credits-track {
+        padding: 14px 12px !important;
+      }
+      .slide3-credits-section {
+        margin: 0 auto 22px !important;
+        max-width: 100% !important;
+      }
+      .slide3-credits-section + .slide3-credits-section {
+        margin-top: 18px !important;
+      }
+      .slide3-credits-title {
+        font-size: 11.5px !important;
+        letter-spacing: 0.18em !important;
+        margin: 0 0 8px !important;
+      }
+      .slide3-credits-list li {
+        font-size: 13px !important;
+        line-height: 1.75 !important;
+      }
+      .slide3-credits-empty {
+        font-size: 11.5px !important;
       }
 
       /* Slide 2 play/pause button: keep it above the footer */
@@ -463,6 +657,16 @@
         bottom: 20px !important;
         left: 12px !important;
       }
+
+      /* Carousel arrows: small + minimal on mobile, kept off the
+         native video controls (which sit along the bottom of the
+         <video>). Vertical center stays clear of the controls. */
+      .hero-arrow {
+        width: 30px;
+        height: 30px;
+      }
+      .hero-arrow-prev { left: 8px; }
+      .hero-arrow-next { right: 8px; }
     }
   </style>
 </head>
@@ -484,17 +688,14 @@
         <div id="slideViewport" class="relative w-full h-full overflow-hidden bg-[#0b1426]">
 
 <!-- Slide 1: Product demo (assets/video/demo.mp4) — same video as slide 2.
-               Native browser video controls (play/pause, seek, volume, fullscreen)
-               so the user can interact with the demo directly. The video is
-               wrapped in a responsive aspect-ratio container so it scales
-               consistently without cropping or stretching. Video is paused
-               by default; user presses play. -->
-          <div class="hero-slide absolute inset-0" data-slide="0" data-duration="9000"
-            style="background:#ffffff;">
-            <div class="video-frame">
-              <video id="firstSlideVideo" controls playsinline preload="metadata"
-                src="assets/video/Demo (4).mp4"></video>
-            </div>
+               The <video> is the slide's only content: full-bleed,
+               edge-to-edge, no card, no background. Native video controls
+               (play/pause, seek, volume, fullscreen) let the user drive
+               the demo. Native 1280:544 aspect ratio preserved via
+               object-fit: contain. Paused by default. -->
+          <div class="hero-slide absolute inset-0" data-slide="0" data-duration="9000">
+            <video id="firstSlideVideo" class="slide-video" controls playsinline preload="metadata"
+              src="assets/video/Demo (4).mp4"></video>
           </div>
 
           <!-- Slide 2: Product Demo (video) -->
@@ -517,62 +718,130 @@
            
           </div>
 
-          <!-- Slide 3: Supported Statement Sources.
-               4 full-width rows (Credit Cards / Savings A/C / UPI Wallets /
-               Mutual Funds). Each row has a tinted left category panel and
-               a responsive right-side logo grid. Renders inside
-               assets/slide3-sources.html so the rest of the page stays
-               untouched. Mounted as an iframe — data-src only, so the
-               bundle is fetched lazily on first visit and warmed up via
-               <link rel=prefetch> after window.load. -->
-          <div class="hero-slide absolute inset-0" data-slide="2" data-duration="9000" style="background:#ffffff;">
-            <div class="absolute inset-0">
-              <iframe
-                id="sourcesFrame"
-                data-src="assets/content/sources.html"
-                title="Supported Statement Sources"
-                loading="lazy"
-                class="sources-iframe"
-                allow="autoplay"
-              ></iframe>
-            </div>
-          </div>
+          <!-- Slide 3: 3D Cube (left) + Scrolling "end credits" of supported
+               financial instruments (right). The cube iframe is mounted
+               lazily — src is only set when the carousel lands here, then
+               the cube is re-loaded on every visit so its entrance
+               animation replays. The credits pane uses a CSS keyframe
+               animation on a doubled track so the scroll loops seamlessly
+               with no visible jump. The content is duplicated inside
+               .slide3-credits-track so the -50% transform resets to a
+               visually identical position. -->
+          <div class="hero-slide absolute inset-0" data-slide="2" data-duration="18000" style="background:#ffffff;">
+            <div class="slide3-split">
+              <div class="slide3-pane slide3-cube">
+                <iframe
+                  id="cubeFrame"
+                  data-src="assets/content/cube.html"
+                  title="Financial Analytics Cube"
+                  loading="lazy"
+                  allow="autoplay; fullscreen"
+                ></iframe>
+              </div>
+              <div class="slide3-pane slide3-credits">
+                <div class="slide3-credits-viewport">
+                  <div class="slide3-credits-track">
+                    <!-- Set 1 -->
+                    <h3 class="slide3-credits-heading">Currently Supported Financial Instruments</h3>
 
-<!-- Slide 4: 3D Financial Cube Animation.
-               The cube is a self-contained page (assets/lightweight-cube.html)
-               — a CSS-3D cube with canvas-rendered charts on each face. We
-               mount it as an iframe so the bundle is loaded only when this
-               slide becomes visible, and stays isolated from the rest of
-               the hero page. The cube URL lives in data-src so the iframe
-               is NOT fetched eagerly on page load — first paint stays
-               light. JS (startCubeIframe) copies data-src into src only
-               when the carousel lands on slide 4, and a one-time
-               <link rel=prefetch> (added in the warm-up hook below)
-               speculatively fetches the bundle after window.load so it's
-               ready when slide 4 shows. -->
-          <div class="hero-slide absolute inset-0" data-slide="3" data-duration="12000" style="background:#ffffff;">
-            <div class="absolute inset-0">
-              <iframe
-                id="cubeFrame"
-                data-src="assets/content/cube.html"
-                title="Financial Analytics Cube"
-                loading="lazy"
-                style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#ffffff;display:block;"
-                allow="autoplay; fullscreen"
-              ></iframe>
+                    <div class="slide3-credits-section">
+                      <h4 class="slide3-credits-title">Credit Cards</h4>
+                      <ul class="slide3-credits-list">
+                        <li>HDFC</li>
+                        <li>SBI</li>
+                        <li>Axis</li>
+                        <li>ICICI</li>
+                        <li>IndusInd</li>
+                        <li>IDFC First</li>
+                      </ul>
+                    </div>
+
+                    <div class="slide3-credits-section">
+                      <h4 class="slide3-credits-title">Savings Accounts</h4>
+                      <ul class="slide3-credits-list">
+                        <li>HDFC</li>
+                        <li>SBI</li>
+                        <li>Axis</li>
+                        <li>ICICI</li>
+                        <li>IDFC First</li>
+                      </ul>
+                    </div>
+
+                    <div class="slide3-credits-section">
+                      <h4 class="slide3-credits-title">UPI Wallets</h4>
+                      <ul class="slide3-credits-list">
+                        <li>Google Pay</li>
+                        <li>PhonePe</li>
+                        <li>Paytm</li>
+                      </ul>
+                    </div>
+
+                    <div class="slide3-credits-section">
+                      <h4 class="slide3-credits-title">Mutual Funds</h4>
+                      <p class="slide3-credits-empty">More providers coming soon</p>
+                    </div>
+
+                    <!-- Set 2 (duplicate for seamless loop) -->
+                    <h3 class="slide3-credits-heading" aria-hidden="true">Currently Supported Financial Instruments</h3>
+
+                    <div class="slide3-credits-section" aria-hidden="true">
+                      <h4 class="slide3-credits-title">Credit Cards</h4>
+                      <ul class="slide3-credits-list">
+                        <li>HDFC</li>
+                        <li>SBI</li>
+                        <li>Axis</li>
+                        <li>ICICI</li>
+                        <li>IndusInd</li>
+                        <li>IDFC First</li>
+                      </ul>
+                    </div>
+
+                    <div class="slide3-credits-section" aria-hidden="true">
+                      <h4 class="slide3-credits-title">Savings Accounts</h4>
+                      <ul class="slide3-credits-list">
+                        <li>HDFC</li>
+                        <li>SBI</li>
+                        <li>Axis</li>
+                        <li>ICICI</li>
+                        <li>IDFC First</li>
+                      </ul>
+                    </div>
+
+                    <div class="slide3-credits-section" aria-hidden="true">
+                      <h4 class="slide3-credits-title">UPI Wallets</h4>
+                      <ul class="slide3-credits-list">
+                        <li>Google Pay</li>
+                        <li>PhonePe</li>
+                        <li>Paytm</li>
+                      </ul>
+                    </div>
+
+                    <div class="slide3-credits-section" aria-hidden="true">
+                      <h4 class="slide3-credits-title">Mutual Funds</h4>
+                      <p class="slide3-credits-empty">More providers coming soon</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
         </div>
       </div>
 
-      <!-- carousel dots -->
-      <div class="absolute bottom-5 left-0 right-0 z-10 flex items-center justify-center gap-2">
-        <button class="hero-dot w-[7px] h-[7px] rounded-full bg-slate-900" data-i="0" aria-label="Slide 1"></button>
-        <button class="hero-dot w-[7px] h-[7px] rounded-full bg-slate-300" data-i="1" aria-label="Slide 2"></button>
-        <button class="hero-dot w-[7px] h-[7px] rounded-full bg-slate-300" data-i="2" aria-label="Slide 3"></button>
-        <button class="hero-dot w-[7px] h-[7px] rounded-full bg-slate-300" data-i="3" aria-label="Slide 4"></button>
-      </div>
+      <!-- carousel navigation: subtle left/right arrows (no dots) -->
+      <button id="heroPrev" type="button" aria-label="Previous slide"
+        class="hero-arrow hero-arrow-prev">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button id="heroNext" type="button" aria-label="Next slide"
+        class="hero-arrow hero-arrow-next">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M9 5L16 12L9 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
     </section>
 
   </main>
@@ -580,70 +849,80 @@
   <script>
     // ---------------------------------------------------------------------------
     // Hero carousel controller
-    // - Slide 1: fixed 9s dwell; video is user-controlled (native controls)
-    // - Slide 2: dwell = duration of the video (pauses carousel until 'ended')
-    // - Slide 3: fixed 9s dwell
-    // - Slide 4: fixed 12s dwell (cube is the whole show)
-    // - Manual dot click resets the timer for the destination slide
-    // - Mouse hover pauses the auto-advance; leave resumes it
+    // - Always starts on Slide 1.
+    // - Slide 1: demo video. On the initial autoplay run the video plays
+    //   automatically; when it ends, advance to Slide 2.
+    // - Slide 2: Moneylizer logo/text animation video. On the initial
+    //   autoplay run it plays automatically; when it ends, advance to
+    //   Slide 3.
+    // - Slide 3: 3D cube (left) + scrolling credits of supported financial
+    //   instruments (right). Slide 3 is the FINAL slide — the autoplay
+    //   run stops here and never returns to Slide 1.
+    // - Once the autoplay run has reached Slide 3, `autoplayEnabled` is
+    //   turned off. From then on, manual nav back to Slide 1 or 2 is
+    //   user-driven (the videos no longer auto-play — the user uses
+    //   native controls on Slide 1, and the Slide 2 video stays paused
+    //   until the user clicks play).
+    // - Prev/Next arrows + touch/trackpad swipe always work for manual
+    //   navigation, including after the autoplay run has ended.
     // ---------------------------------------------------------------------------
     (function () {
       const slides = document.querySelectorAll('.hero-slide');
-      const dots = document.querySelectorAll('.hero-dot');
       const viewport = document.getElementById('slideViewport');
+      const demoEl = document.getElementById('demo');
       const video = document.getElementById('demoVideo');
       const firstSlideVideo = document.getElementById('firstSlideVideo');
+      const prevBtn = document.getElementById('heroPrev');
+      const nextBtn = document.getElementById('heroNext');
       const playToggle = document.getElementById('playToggle');
       const pauseIcon = document.getElementById('pauseIcon');
       const playIcon = document.getElementById('playIcon');
 
-      const DEFAULT_DWELL = 5000; // ms — Slides 1, 3
-      const CUBE_DWELL_MS = 12000; // ms — Slide 4 (cube is the whole show)
       const VIDEO_DWELL = 'video'; // sentinel for slide 2
 
-      // ---- Slide 3: Supported Statement Sources (lazy iframe).
-      // The 4-row category panel is its own page (assets/slide3-sources.html),
-      // so we only mount the iframe on first visit and never reload it —
-      // the inner page has no entry animation, just a static grid + hover.
-      const SOURCES_URL = 'assets/content/sources.html';
-
+      // True on the first autoplay run. Flipped to false once Slide 3 is
+      // reached, and stays false for the rest of the session — that way
+      // the carousel never loops and the videos don't re-autoplay after
+      // the user has seen the whole presentation.
+      let autoplayEnabled = true;
       let active = 0;
-      let timer = null;
-      let hovered = false;
+
+      // ---- Slide 3: 3D Financial Cube (lazy iframe).
+      // The cube lives in assets/content/cube.html (a CSS-3D cube with
+      // canvas-rendered charts on each face). We mount it as an iframe
+      // so the bundle is loaded only when this slide becomes visible,
+      // and stays isolated from the rest of the hero page. The cube URL
+      // is stored in data-src so the iframe is NOT fetched eagerly on
+      // page load — first paint stays light. startCubeIframe() copies
+      // data-src into src on the FIRST visit to slide 3 and NEVER
+      // re-loads: the cube is heavy enough that re-downloading on every
+      // carousel loop would be wasteful, and the auto-rotate inside the
+      // cube is the "alive" signal. After window.load fires we also drop
+      // in a <link rel=prefetch> so the cube downloads in the idle
+      // window before the carousel naturally reaches slide 3.
+      const CUBE_URL = 'assets/content/cube.html';
 
       function setPlaying(p) {
         pauseIcon.classList.toggle('hidden', !p);
         playIcon.classList.toggle('hidden', p);
       }
 
-      function dwellFor(slideEl) {
-        if (!slideEl) return DEFAULT_DWELL;
-        if (slideEl.dataset.duration === VIDEO_DWELL) return VIDEO_DWELL;
-        // Numeric data-duration overrides DEFAULT_DWELL — used by slide 3
-        // (sources) so it has time to read the 4 rows.
-        const override = parseInt(slideEl.dataset.duration, 10);
-        if (!isNaN(override) && override !== DEFAULT_DWELL) return override;
-        return DEFAULT_DWELL;
-      }
-
       function clearTimer() {
-        if (timer) { clearTimeout(timer); timer = null; }
+        // No-op: kept for API symmetry with the previous carousel
+        // controller. The carousel is now event-driven (ended events
+        // + manual nav), so there is no auto-advance timer to clear.
       }
 
+      // Slide 1 and Slide 2 own their own timelines: their videos fire
+      // 'ended' events that advance the carousel. Slide 3 is the final
+      // stop — once we reach it, autoplayEnabled is flipped off and the
+      // carousel does not advance on its own. This function is kept as
+      // a no-op so the existing goTo() / clearTimer() call sites stay
+      // readable; it intentionally does NOT schedule any auto-advance.
       function scheduleAdvance() {
-        clearTimer();
-        if (hovered) return;
-        if (active === 3) {
-          // Slide 4: cube is the whole show. Hold for CUBE_DWELL_MS then loop.
-          timer = setTimeout(() => goTo(0), CUBE_DWELL_MS);
-          return;
-        }
-        const dwell = dwellFor(slides[active]);
-        if (dwell === VIDEO_DWELL) {
-          // Slide 2: do nothing — 'ended' event will move us forward
-          return;
-        }
-        timer = setTimeout(() => goTo(active + 1), dwell);
+        // No-op: the carousel is event-driven (ended events + manual
+        // nav). We deliberately do NOT call goTo(active + 1) on a
+        // timer — that would re-introduce the looping behaviour.
       }
 
       function goTo(i, opts) {
@@ -654,29 +933,38 @@
           s.style.opacity = idx === active ? '1' : '0';
           s.style.pointerEvents = idx === active ? 'auto' : 'none';
         });
-        dots.forEach((d, idx) => {
-          d.classList.toggle('bg-slate-900', idx === active);
-          d.classList.toggle('bg-slate-300', idx !== active);
-        });
 
-        // Slide 1: demo video is user-controlled via native controls.
-        // Don't autoplay — reset the video so the user sees frame 0 ready
-        // to play, but leave it paused.
+        // Slide 1: demo video. On the initial autoplay run we play the
+        // video automatically; the 'ended' event on firstSlideVideo
+        // advances to Slide 2. If the user has already reached Slide 3
+        // once (autoplayEnabled === false), the video stays paused and
+        // is fully user-controlled via native controls.
         if (active === 0) {
           firstSlideVideo.pause();
           try { firstSlideVideo.currentTime = 0; } catch (e) { /* ignore */ }
+          if (autoplayEnabled) {
+            const playPromise = firstSlideVideo.play();
+            if (playPromise && typeof playPromise.catch === 'function') {
+              playPromise.catch(() => { /* autoplay can be blocked until user interaction */ });
+            }
+          }
         } else {
           // Leaving slide 1: stop/reset the video
           firstSlideVideo.pause();
           try { firstSlideVideo.currentTime = 0; } catch (e) { /* ignore */ }
         }
 
-        // Slide 2: video owns the timeline
+        // Slide 2: video. Autoplay on the initial run; user-controlled
+        // (paused) after Slide 3 has been reached.
         if (active === 1) {
           try { video.currentTime = 0; } catch (e) { /* metadata may not be ready yet */ }
-          const playPromise = video.play();
-          if (playPromise && typeof playPromise.catch === 'function') {
-            playPromise.catch(() => { /* autoplay can be blocked until user interaction */ });
+          if (autoplayEnabled) {
+            const playPromise = video.play();
+            if (playPromise && typeof playPromise.catch === 'function') {
+              playPromise.catch(() => { /* autoplay can be blocked until user interaction */ });
+            }
+          } else {
+            video.pause();
           }
         } else {
           // Leaving slide 2: stop/reset the video
@@ -684,28 +972,82 @@
           try { video.currentTime = 0; } catch (e) { /* ignore */ }
         }
 
-        // (Slide 1 video handles its own entrance — no iframe to mount.)
-
-        // Slide 3: mount the supported-sources iframe on first visit.
+        // Slide 3: the 3D cube runs inside an iframe. Mount it on first
+        // visit only — the cube's internal auto-rotate keeps it "alive"
+        // on subsequent visits, and reloading on every carousel loop
+        // would waste a heavy bundle download.
         if (active === 2) {
-          startSourcesIframe();
-        }
-
-        // Slide 4: the 3D cube runs inside an iframe. Re-load it whenever
-        // we land on this slide so its entrance animation replays from the
-        // start (small, distant, then scales in). Leave it mounted otherwise.
-        if (active === 3) {
           startCubeIframe();
+          // Slide 3 is the final slide. From this point on we never
+          // auto-advance again, and the videos on Slides 1 and 2 will
+          // no longer autoplay if the user navigates back manually.
+          autoplayEnabled = false;
         }
 
         if (manual) clearTimer();          // user-initiated jump cancels any pending tick
         scheduleAdvance();
       }
 
-      // ---- dot (manual) navigation ----
-      dots.forEach(d => d.addEventListener('click', () => {
-        goTo(parseInt(d.dataset.i, 10), { manual: true });
-      }));
+      // ---- arrow (manual) navigation ----
+      if (prevBtn) prevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        goTo(active - 1, { manual: true });
+      });
+      if (nextBtn) nextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        goTo(active + 1, { manual: true });
+      });
+
+      // ---- touch + trackpad swipe navigation ----
+      // Horizontal swipe (touch) and horizontal trackpad pan advance the
+      // carousel. Swipes shorter than the threshold, or mostly vertical,
+      // are ignored. Trackpad horizontal scroll is converted to prev/next
+      // using a debounced "dominant" direction check so a single trackpad
+      // gesture doesn't fire many times in a row.
+      const SWIPE_THRESHOLD = 50;   // px
+      const SWIPE_VELOCITY  = 0.3;  // px/ms
+
+      let touchStartX = 0, touchStartY = 0, touchStartT = 0;
+      let trackpadDeltaX = 0, trackpadTimer = null;
+
+      if (demoEl) {
+        demoEl.addEventListener('touchstart', (e) => {
+          if (!e.touches || e.touches.length !== 1) return;
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          touchStartT = Date.now();
+        }, { passive: true });
+
+        demoEl.addEventListener('touchend', (e) => {
+          if (touchStartT === 0) return;
+          const t = (e.changedTouches && e.changedTouches[0]) || null;
+          if (!t) { touchStartT = 0; return; }
+          const dx = t.clientX - touchStartX;
+          const dy = t.clientY - touchStartY;
+          const dt = Date.now() - touchStartT;
+          touchStartT = 0;
+          if (Math.abs(dx) < SWIPE_THRESHOLD) return;
+          if (Math.abs(dx) < Math.abs(dy)) return;          // mostly vertical
+          if (Math.abs(dx / Math.max(dt, 1)) < SWIPE_VELOCITY) return;
+          goTo(dx < 0 ? active + 1 : active - 1, { manual: true });
+        }, { passive: true });
+
+        // Trackpad / wheel horizontal pan → prev/next. Vertical wheel
+        // events are left alone so the page can still scroll if needed.
+        demoEl.addEventListener('wheel', (e) => {
+          if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // not horizontal
+          if (Math.abs(e.deltaX) < 10) return;                  // too small
+          trackpadDeltaX += e.deltaX;
+          if (trackpadTimer) return;
+          trackpadTimer = setTimeout(() => {
+            if (Math.abs(trackpadDeltaX) >= 40) {
+              goTo(trackpadDeltaX < 0 ? active + 1 : active - 1, { manual: true });
+            }
+            trackpadDeltaX = 0;
+            trackpadTimer = null;
+          }, 80);
+        }, { passive: true });
+      }
 
       // ---- video controls (slide 2) ----
       playToggle.addEventListener('click', (e) => {
@@ -715,26 +1057,33 @@
       video.addEventListener('play', () => setPlaying(true));
       video.addEventListener('pause', () => setPlaying(false));
       video.addEventListener('ended', () => {
-        // Video finished — advance to slide 3
-        if (active === 1) goTo(2);
+        // Video finished during the autoplay run — advance to slide 3.
+        // After Slide 3 has been reached, autoplayEnabled is false, so
+        // this listener is effectively a no-op (the user would have had
+        // to manually navigate back to slide 2 and replay the video,
+        // in which case we don't want to chain another advance).
+        if (active === 1 && autoplayEnabled) goTo(2);
       });
 
-      // ---- hover pause/resume ----
-      viewport.addEventListener('mouseenter', () => { hovered = true; clearTimer(); });
-      viewport.addEventListener('mouseleave', () => { hovered = false; scheduleAdvance(); });
+      // ---- slide 1: demo video 'ended' → slide 2.
+      // Same gating as slide 2: only auto-advance during the initial
+      // autoplay run. If the user manually plays slide 1 after the run
+      // has ended, the video plays through but the carousel stays put. ----
+      firstSlideVideo.addEventListener('ended', () => {
+        if (active === 0 && autoplayEnabled) goTo(1);
+      });
 
-      // ---- slide 4: 3D Financial Cube (LAZY iframe).
+      // ---- slide 3: 3D Financial Cube (LAZY iframe).
       // The iframe has data-src but no src, so the browser does NOT fetch
-      // assets/lightweight-cube.html on page load — first paint stays light.
+      // assets/content/cube.html on page load — first paint stays light.
       // startCubeIframe() copies data-src into src on the FIRST visit to
-      // slide 4 and NEVER re-loads. The cube bundle is heavy enough that
+      // slide 3 and NEVER re-loads. The cube bundle is heavy enough that
       // re-downloading on every carousel loop would be wasteful, and the
       // entrance animation doesn't carry the slide — the auto-rotate
       // inside the cube is the "alive" signal. After window.load fires we
       // also drop in a <link rel=prefetch> so the cube downloads in the
-      // idle window before the carousel naturally reaches slide 4. ----
-      const cubeFrame  = document.getElementById('cubeFrame');
-      const CUBE_URL   = 'assets/content/cube.html';
+      // idle window before the carousel naturally reaches slide 3. ----
+      const cubeFrame = document.getElementById('cubeFrame');
 
       function startCubeIframe() {
         if (!cubeFrame || cubeFrame.src) return;
@@ -759,21 +1108,13 @@
         } catch (e) { /* ignore */ }
       }
 
-      // ---- slide 3: Supported Statement Sources (LAZY iframe). ----
-      const sourcesFrame = document.getElementById('sourcesFrame');
-
-      function startSourcesIframe() {
-        if (!sourcesFrame || sourcesFrame.src) return;
-        sourcesFrame.src = SOURCES_URL;
-      }
-
       // ---- init ----
       slides.forEach(s => { s.style.transition = 'opacity .5s ease'; });
       goTo(0);
-      // The remaining iframe (sources) is lazy — page load stays fast.
-      // After window.load we speculatively prefetch its bundle so it's
-      // cached before the carousel naturally reaches slide 3.
-      function warmup() { prefetch(SOURCES_URL); prefetch(CUBE_URL); }
+      // The remaining iframe (cube) is lazy — page load stays fast. After
+      // window.load we speculatively prefetch its bundle so it's cached
+      // before the carousel naturally reaches slide 3.
+      function warmup() { prefetch(CUBE_URL); }
       if (document.readyState === 'complete') warmup();
       else window.addEventListener('load', warmup, { once: true });
     })();
